@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Node.js and MongoDB</title>
+    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
+    <script src="./public/utils/get.mjs"></script>
+    
+  </head>
+  <body>
+    <!-- 掲示板のひな型作成 -->
+    <div class="board-section">
+      <h2>Bulletine Board Application with Local Server and MongoDB</h2>
+      <!-- この中に挿入していく -->
+      <div class="thread-section"></div>
+      <form class="form-section">
+        <p>TITLE</p>
+        <input type="text" placeholder="Title" id="inputTitle" />
+        <br />
+        <label
+          >Please describe bellow: <br />
+          <textarea id="inputContent" placeholder="Description" rows="10" cols="30"></textarea>
+        </label>
+        <br />
+        <button id="submitButton" type="submit">SUBMIT</button>
+      </form>
+    </div>
+    <script src="./preload_board.cjs"></script>
+    <link rel="stylesheet" href="../style/board.css">
+   
+  </body>
+</html>
