@@ -5,6 +5,8 @@ const startupProcess = fork(path.join(__dirname, './public/mainProcess/startup.c
 const serverProcess = fork(path.join(__dirname, './public/mainProcess/server.cjs'));
 const express = require('express');
 const appExpr = express();
+console.log(__dirname, path.join(__dirname, '../public/preload/preload_board.cjs'));
+
 appExpr.use(express.json());
 appExpr.use(express.static('public'));
 appExpr.use(express.static('public/style'));
@@ -14,13 +16,12 @@ appExpr.use(express.static('public/preload'));
 app.setPath("userData", path.join(__dirname, "data"));
 
 const {startUp} = require(path.join(__dirname, './public/mainProcess/startup.cjs'));
-const {startServer, useMongoDB, useLocalServer, nouseMngdb, createBoard} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
+const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
 app.disableHardwareAcceleration() //hardware accelerationを無効にするのは、before app is ready
 app.whenReady().then(() => {
   startUp();
 });
 ipcMain.handle('startup-config-data', (event, data) => {
-  //console.log('debug for sent data to server.cjs: ', data);
   const a = data.mongodbUriValue;
   const b = data.localhostPortValue;
   const c = data.wmngdbButtonClicked;

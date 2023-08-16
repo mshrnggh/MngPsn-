@@ -1,5 +1,4 @@
 const { app, BrowserWindow } = require("electron");
-const { fork } = require("child_process");
 const path = require("path");
 const url = require("url");
 function startUp() {

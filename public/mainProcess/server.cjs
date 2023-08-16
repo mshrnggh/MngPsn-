@@ -1,4 +1,3 @@
-const { app } = require("electron");
 const fs = require("fs");
 const path = require("path");
 const url = require('url');
@@ -8,7 +7,6 @@ const express = require("express");
 const appExpr = express();
 appExpr.use(express.json());
 const mongoose = require("mongoose");
-//const startup = require(path.join(__dirname, 'startup.cjs'));
 let boardWindow;
 let mongodbUriValue="";
 let localhostPortValue="";
@@ -16,24 +14,19 @@ let wmngdbButtonClicked=false;
 let olocalButtonClicked=false;
   
 function startServer(mongodbUriValue,localhostPortValue,wmngdbButtonClicked,olocalButtonClicked) { 
-  //console.log('1:', mongodbUriValue, localhostPortValue, wmngdbButtonClicked, olocalButtonClicked);
   if (wmngdbButtonClicked === true) {
-    //console.log("2: ",mongodbUriValue, localhostPortValue, wmngdbButtonClicked, olocalButtonClicked);
     mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
     if (mongodbUriValue) {
-      //console.log("3: ",mongodbUriValue, localhostPortValue, wmngdbButtonClicked, olocalButtonClicked);
-      useMongoDB(mongodbUriValue||process.env.MONGO_URI).then(() => {
+        useMongoDB(mongodbUriValue||process.env.MONGO_URI).then(() => {
       useLocalServer(localhostPortValue||process.env.PORT);
     }).catch((error) => {
-      //console.error(error);
+       console.error(error);
     });
     } else {
-    //console.log("4: ", mongodbUriValue, localhostPortValue, wmngdbButtonClicked, olocalButtonClicked);
     nouseMngdb();
     useLocalServer(localhostPortValue||process.env.PORT);
     }
   } else {
-    //console.log("5: ",mongodbUriValue, localhostPortValue, wmngdbButtonClicked, olocalButtonClicked);
     useLocalServer(localhostPortValue||process.env.PORT);
   }
   createBoard();
@@ -94,32 +87,53 @@ function useLocalServer(localhostPortValue) {
 function nouseMngdb(){console.log('今回はMongoDBを使いません。');};
 
 function createBoard() {
-  const { BrowserWindow,app } = require("electron");
+  const { BrowserWindow, app,ipcMain } = require("electron");
   app.whenReady().then(() => {
-  app.commandLine.appendSwitch('disable-gpu');
-  app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
-  app.commandLine.appendSwitch('enable-software-rasterizer');
-  boardWindow = new BrowserWindow({
-    fullscreen: true,
-    webPreferences: {
-      nodeIntegration: false, // レンダラープロセスでNode.jsのAPIを使えなくする
-      contextIsolation: true, // レンダラープロセスのJavaScriptのコンテキストを分離する
-      useAngle:false, // Angleを無効にする
-      hardwareAcceleratuion:false, // ハードウェアアクセラレーションを無効にする
-      worldSafeExecuteJavaScript: true, // レンダラープロセスで実行されるJavaScriptのコンテキストを分離する
-      enableRemoteModule: false, // remoteモジュールを無効にする
-      preload: path.join(__dirname, 'preload_board.cjs'),
-      webSecurity: true, // クロスサイトスクリプティングを防ぐ
-      allowRunningInsecureContent: false, // httpsでないコンテンツの実行を許可しない
-      contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
-    },
-  });
-    boardWindow.loadURL(url.format({
+   console.log(__dirname, path.join(__dirname, '../public/preload/preload_board.cjs'));
+   app.commandLine.appendSwitch('disable-gpu');
+   app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
+   app.commandLine.appendSwitch('enable-software-rasterizer');
+   boardWindow = new BrowserWindow({
+     fullscreen: true,
+     webPreferences: {
+       nodeIntegration: false, 
+       contextIsolation: true,
+       useAngle:false,
+       hardwareAcceleratuion:false,
+       worldSafeExecuteJavaScript: true, 
+       enableRemoteModule: false, 
+       preload: path.join(__dirname, '../preload/preload_board.cjs'),
+       webSecurity: true, 
+       allowRunningInsecureContent: false, 
+       contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
+     },
+   });
+   boardWindow.loadURL(url.format({
       pathname: path.join(__dirname, '../render/index.html'),
       protocol: 'file:',
-      slashes: true
-     }));
+      //slashes: true
+   }));
+   ipcMain.on('add-note-to-localdb', (event, data) => {
+      const filePath = path.join(__dirname, 'thread_data.json');
+      const jsonData = JSON.stringify(data, null, 2);
+      fs.appendFile(filePath, jsonData, (err) => {
+        if (err) throw err;
+        console.log('Data saved to local DB');
+      });
+   });
+   ipcMain.on('add-note-to-mongodb', (event, note) => {
+      const data = new Note({
+      id: note.id,
+      storedAt: 'MongoDB',
+      title: note.title,
+      content: note.content,
+      createdAt: new Date(),
+      });
+      data.save()
+      .then(() => console.log('Data saved to MongoDB'))
+      .catch((err) => console.error(err));
+  });
 });
 };
 
-module.exports = {startServer, useMongoDB, useLocalServer, nouseMngdb, createBoard};
+module.exports = {startServer};

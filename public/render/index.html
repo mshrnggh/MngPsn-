@@ -5,8 +5,8 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Node.js and MongoDB</title>
-    <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script>
-    <script src="./public/utils/get.mjs"></script>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/axios/dist/axios.min.js"></script> -->
+    <!-- <script type="module" src="get.mjs"></script> -->
     
   </head>
   <body>
@@ -17,18 +17,20 @@
       <div class="thread-section"></div>
       <form class="form-section">
         <p>TITLE</p>
-        <input type="text" placeholder="Title" id="inputTitle" />
+        <input type="text" placeholder="Title" id="inputTitle" name="inputTitle" />
         <br />
         <label
           >Please describe bellow: <br />
-          <textarea id="inputContent" placeholder="Description" rows="10" cols="30"></textarea>
+          <textarea id="inputContent" name="inputContent" placeholder="Description" rows="10" cols="30"></textarea>
         </label>
         <br />
-        <button id="submitButton" type="submit">SUBMIT</button>
+        <button id="submitLocal" type="submit">Send to Local</button>
+        <button id="submitMongoDB" type="submit">Send to MongoDB</button>
+        <script type="module" src="post.mjs"></script>
       </form>
+      <div class="notePadBackground"></div>
     </div>
-    <script src="./preload_board.cjs"></script>
+    <script src="../preload/preload_board.cjs"></script>
     <link rel="stylesheet" href="../style/board.css">
-   
   </body>
 </html>

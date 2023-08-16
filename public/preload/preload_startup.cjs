@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, ipcMain } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('myAPI', {
   sendConfig: (configData) => {
     return new Promise((resolve, reject) => {
