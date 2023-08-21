@@ -1,0 +1,77 @@
+body {
+    height: 100%;
+}
+
+body {
+    background-image: url('../images/BoardsWooden.jpg');
+    width: 100%;
+    height: 100%;
+    overflow-x: hidden;
+    display: center;
+    justify-content: center;
+    align-items: center;
+}y
+
+.config {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.mongo-config-set {
+    font-size: 50px;
+    color: rgb(255, 141, 167);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 2px 2px 4px rgb(92, 9, 29), -2px -2px 4px rgb(212, 0, 95), 2px -2px 4px rgba(134, 0, 112, 0.768), -2px 2px 4px rgb(3, 0, 3);
+}
+
+#mongodb-conf {
+    color: rgba(244, 244, 255, 0.974);
+    margin-top: 50px;
+    font-size: 25px;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 1.5);
+    text-shadow: 2px 2px 4px rgb(1, 19, 53), -2px -2px 4px rgb(2, 58, 41), 2px -2px 4px rgb(13, 64, 247), -2px 2px 4px rgba(1, 162, 255, 0.734);
+}
+
+#mongodb-conf textarea {
+    background-color: rgb(253, 248, 248);
+    color: black;
+    font-size: 24px;
+    font-weight: bold;
+    width: 950px;
+    margin: 0 auto;
+    display: block;
+}
+
+#mongodb-uri {
+    box-shadow: inset 0px 0px 20px rgba(0, 0, 0, 1.5);
+}
+
+.conf-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 50px;
+}
+
+.conf-submit button {
+    font-size: 50px;
+    color: rgb(108, 0, 58);
+    background-color: rgba(230, 182, 27, 0.887);
+    border: none;
+    border-radius: 10px;
+    box-shadow: 0px 5px 0px 0px rgba(0, 0, 0, 1.0);
+    text-shadow: 2px 2px 4px rgba(34, 1, 15, 0.85), -2px -2px 4px rgb(252, 238, 110), 2px -2px 4px rgba(254, 106, 172, 0.854), -2px 2px 4px rgba(32, 1, 13, 0.566);
+    transition: all 0.1s ease-in-out;
+}
+
+.conf-submit button:active {
+    box-shadow: 0px 2px 0px 0px rgba(0, 0, 0, 1.0);
+    transform: translateY(3px);
+}

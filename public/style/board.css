@@ -190,7 +190,8 @@ body {
   height: 60%;
 }
 #submitLocal,
-#submitMongoDB {
+#submitMongoDB, 
+#to_mongoConfig{
   opacity: 0.8;
   font-size: 16px;
   font-weight: 900;
@@ -206,4 +207,9 @@ body {
   display: inline-block;
   justify-content: center;
   text-shadow: 1px 1px 1px rgba(0, 0, 0, 0.5), -2px -2px 4px rgba(255, 255, 255, 0.5), 2px -2px 4px rgba(255, 255, 255, 0.5), -2px 2px 4px rgba(11, 3, 3, 0.5);
+}
+
+#to_mongoConfig {
+  color: #632801;
+  text-shadow: 1px 1px 1px rgba(165, 0, 0, 0), -2px -2px 4px rgba(255, 219, 157, 0.5), 2px -2px 4px rgba(255, 197, 142, 0.5), -2px 2px 4px rgb(190, 0, 0);
 }

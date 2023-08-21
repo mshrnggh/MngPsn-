@@ -1,3 +1,4 @@
+const { ipcMain} = require("electron");
 const fs = require("fs");
 const path = require("path");
 const url = require('url');
@@ -9,98 +10,83 @@ appExpr.use(express.json());
 const mongoose = require("mongoose");
 let boardWindow;
 let mongodbUriValue="";
-let localhostPortValue="";
 let wmngdbButtonClicked=false;
 let olocalButtonClicked=false;
-  
-function startServer(mongodbUriValue,localhostPortValue,wmngdbButtonClicked,olocalButtonClicked) { 
+function startServer(mongodbUriValue,wmngdbButtonClicked,olocalButtonClicked) { 
   if (wmngdbButtonClicked === true) {
     mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
     if (mongodbUriValue) {
-        useMongoDB(mongodbUriValue||process.env.MONGO_URI).then(() => {
-      useLocalServer(localhostPortValue||process.env.PORT);
+      useMongoDB(mongodbUriValue||process.env.MONGO_URI).then(() => {
+      useLocalServer();
     }).catch((error) => {
        console.error(error);
     });
-    } else {
+    } else if(olocalButtonClicked===true){
     nouseMngdb();
-    useLocalServer(localhostPortValue||process.env.PORT);
+    useLocalServer();
     }
   } else {
-    useLocalServer(localhostPortValue||process.env.PORT);
+    useLocalServer();
   }
-  createBoard();
+   createBoard(olocalButtonClicked, wmngdbButtonClicked);
 };
-
 function useMongoDB(mongodbUriValue, res) { 
   if (mongodbUriValue === process.env.MONGO_URI){
-     return new Promise((resolve, reject) => {
-       mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
-       .then(() => {
-         console.log("Connected to MongoDB Atlas");
-         const server = appExpr.listen(process.env.PORT, () => {
-           console.log(`Server running on port ${process.env.PORT}`);
-         });
-       }).catch(error => console.error(error));});
-    } else if (mongodbUriValue && mongodbUriValue !== process.env.MONGO_URI) {
-        return new Promise((resolve, reject) => {
-          mongoose.connect(mongodbUriValue, { useNewUrlParser: true, useUnifiedTopology: true })
-          .then(() => {
-            console.log("Connected to MongoDB Atlas");
-            process.env.MONGO_URI = mongodbUriValue;
-            const envPath = path.join(__dirname, '.env');
-            const envContent = fs.readFileSync(envPath, 'utf-8');
-            const newEnvContent = envContent.replace(`MONGO_URI=${process.env.MONGO_URI}`, `MONGO_URI=${mongodbUriValue}`);
-            fs.writeFileSync(envPath, newEnvContent);})
-            const server = appExpr.listen(process.env.PORT, () => {
-              console.log(`Server running on port ${process.env.PORT}`);
-            });
-          }).catch(error => { console.error(error);
-            console.log("MongoDB Atlas URI is incorrect!");
-            //res.redirect('/');
-          });
-        };
-    }    
-
-function useLocalServer(localhostPortValue) {
-  if (localhostPortValue === process.env.PORT) {
-    appExpr.listen(process.env.PORT, () => console.log(`Server started at Port ${process.env.PORT}`));
-  } else if (localhostPortValue !== process.env.PORT) {
-    appExpr.listen(localhostPortValue, (error) => {
-      if (error) {
-        console.error(error);
-        console.log("利用できるPORT番号を設定してください！");
-        } else {
-        console.log(`Server started at Port ${localhostPortValue}`);
-        process.env.PORT = localhostPortValue;
+    return new Promise((resolve, reject) => {
+      mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        ipcMain.on('connecttomongodb', (event)=> {event.reply("Connected to MongoDB Atlas");});
+        const server = appExpr.listen(process.env.PORT, () => {
+          ipcMain.on('serveron', (event)=> {event.reply(`Server running on port ${process.env.PORT}`);});
+          resolve(server);
+        });
+      })
+      .catch(error => {
+        reject(error);
+      });
+    });
+  } else if (mongodbUriValue && mongodbUriValue !== process.env.MONGO_URI) {
+    return new Promise((resolve, reject) => {
+      mongoose.connect(mongodbUriValue, { useNewUrlParser: true, useUnifiedTopology: true })
+      .then(() => {
+        ipcMain.on('connecttomongodb', (event)=> {event.reply("Connected to MongoDB Atlas");});
+        process.env.MONGO_URI = mongodbUriValue;
         const envPath = path.join(__dirname, '.env');
         const envContent = fs.readFileSync(envPath, 'utf-8');
-        const newEnvContent = envContent.replace(`PORT=${process.env.PORT}`, `PORT=${localhostPortValue}`);
+        const newEnvContent = envContent.replace(`MONGO_URI=${process.env.MONGO_URI}`, `MONGO_URI=${mongodbUriValue}`);
         fs.writeFileSync(envPath, newEnvContent);
-      }
+        const server = appExpr.listen(process.env.PORT, () => {
+          ipcMain.on('serveron', (event)=> {event.reply(`Server running on port ${process.env.PORT}`);});
+          resolve(server);
+        });
+      })
+      .catch(error => {
+        reject(error);
+        ipcMain.on('mongodb-uri-incorrect', (event) => {
+          event.reply('mongodb-uri-incorrect-reply', 'MongoDB Atlas URI is incorrect!');
+        });
+      });
     });
-  } else if (!localhostPortValue) {  
-    appExpr.listen(process.env.PORT, () => console.log(`Server started at Port ${process.env.PORT}`));
   }
-};
-
-function nouseMngdb(){console.log('今回はMongoDBを使いません。');};
-
-function createBoard() {
-  const { BrowserWindow, app,ipcMain } = require("electron");
-  app.whenReady().then(() => {
-   console.log(__dirname, path.join(__dirname, '../public/preload/preload_board.cjs'));
+}
+function useLocalServer() {}
+function nouseMngdb(){ipcMain.on('nouseMongodb', (event)=>{event.reply('今回はMongoDBを使いません。')});}
+function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
+  const { BrowserWindow, app, ipcMain } = require("electron");
+  let Thread;
+  import('../mngSchema.mjs').then(module => {
+    Thread = module.Thread;
+  });
    app.commandLine.appendSwitch('disable-gpu');
    app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
    app.commandLine.appendSwitch('enable-software-rasterizer');
    boardWindow = new BrowserWindow({
      fullscreen: true,
      webPreferences: {
-       nodeIntegration: false, 
+       nodeIntegration: true, 
        contextIsolation: true,
-       useAngle:false,
-       hardwareAcceleratuion:false,
        worldSafeExecuteJavaScript: true, 
+       useAngle:false,
        enableRemoteModule: false, 
        preload: path.join(__dirname, '../preload/preload_board.cjs'),
        webSecurity: true, 
@@ -111,29 +97,37 @@ function createBoard() {
    boardWindow.loadURL(url.format({
       pathname: path.join(__dirname, '../render/index.html'),
       protocol: 'file:',
-      //slashes: true
+      slashes: true
    }));
+   ipcMain.handleOnce('get-DBdata', (event) => {
+     const data = {
+       olocalButtonClicked: olocalButtonClicked,
+       wmngdbButtonClicked: wmngdbButtonClicked
+      };
+      return data;
+    });
+   ipcMain.removeAllListeners('add-note-to-localdb');
    ipcMain.on('add-note-to-localdb', (event, data) => {
-      const filePath = path.join(__dirname, 'thread_data.json');
-      const jsonData = JSON.stringify(data, null, 2);
-      fs.appendFile(filePath, jsonData, (err) => {
+      const filePath = path.join(__dirname, '../localData.json');
+      fs.readFile(filePath, (err, fileData) => {
         if (err) throw err;
-        console.log('Data saved to local DB');
+        const existingData = JSON.parse(fileData);
+        const newData = Array.isArray(existingData) ? [...existingData, data] : [data];
+        fs.writeFile(filePath, JSON.stringify(newData, null, 2), (err) => {
+          if (err) throw err;
+          console.log('Data saved to local DB');
+        });
       });
-   });
-   ipcMain.on('add-note-to-mongodb', (event, note) => {
-      const data = new Note({
-      id: note.id,
-      storedAt: 'MongoDB',
-      title: note.title,
-      content: note.content,
-      createdAt: new Date(),
+    });
+    ipcMain.removeAllListeners('add-note-to-mongodb');
+    ipcMain.on('add-note-to-mongodb', (event, data) => {
+      const newData = new Thread({
+        title: data.title,
+        content: data.content,
       });
-      data.save()
+      newData.save()
       .then(() => console.log('Data saved to MongoDB'))
       .catch((err) => console.error(err));
-  });
-});
-};
-
-module.exports = {startServer};
+    });
+  };
+  module.exports = {startServer, getBoardWindow: () => boardWindow};

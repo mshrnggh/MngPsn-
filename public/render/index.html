@@ -17,20 +17,21 @@
       <div class="thread-section"></div>
       <form class="form-section">
         <p>TITLE</p>
-        <input type="text" placeholder="Title" id="inputTitle" name="inputTitle" />
+        <input type="text" placeholder="Title" id="inputTitle" name="inputTitle" required/>
         <br />
         <label
           >Please describe bellow: <br />
-          <textarea id="inputContent" name="inputContent" placeholder="Description" rows="10" cols="30"></textarea>
+          <textarea id="inputContent" name="inputContent" placeholder="Description" rows="10" cols="30" required></textarea>
         </label>
         <br />
         <button id="submitLocal" type="submit">Send to Local</button>
         <button id="submitMongoDB" type="submit">Send to MongoDB</button>
         <script type="module" src="post.mjs"></script>
+        <script type="module" src="olorwm.mjs"></script>
+        <!-- <script src="../preload/preload_board.cjs"></script> -->
       </form>
       <div class="notePadBackground"></div>
     </div>
-    <script src="../preload/preload_board.cjs"></script>
     <link rel="stylesheet" href="../style/board.css">
   </body>
 </html>
