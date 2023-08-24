@@ -17,16 +17,13 @@ function startServer(mongodbUriValue,wmngdbButtonClicked,olocalButtonClicked) {
     mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
     if (mongodbUriValue) {
       useMongoDB(mongodbUriValue||process.env.MONGO_URI).then(() => {
-      useLocalServer();
+      
     }).catch((error) => {
        console.error(error);
     });
     } else if(olocalButtonClicked===true){
     nouseMngdb();
-    useLocalServer();
     }
-  } else {
-    useLocalServer();
   }
    createBoard(olocalButtonClicked, wmngdbButtonClicked);
 };
@@ -69,7 +66,6 @@ function useMongoDB(mongodbUriValue, res) {
     });
   }
 }
-function useLocalServer() {}
 function nouseMngdb(){ipcMain.on('nouseMongodb', (event)=>{event.reply('今回はMongoDBを使いません。')});}
 function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
   const { BrowserWindow, app, ipcMain } = require("electron");
@@ -99,13 +95,11 @@ function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
       protocol: 'file:',
       slashes: true
    }));
-   ipcMain.handleOnce('get-DBdata', (event) => {
-     const data = {
-       olocalButtonClicked: olocalButtonClicked,
-       wmngdbButtonClicked: wmngdbButtonClicked
-      };
-      return data;
-    });
+   ipcMain.removeAllListeners('get-DBdata');
+   ipcMain.on('get-DBdata', (event) => {
+     const data = {olocalButtonClicked,wmngdbButtonClicked};
+     event.reply('get-DBdata', data);
+   });
    ipcMain.removeAllListeners('add-note-to-localdb');
    ipcMain.on('add-note-to-localdb', (event, data) => {
       const filePath = path.join(__dirname, '../localData.json');
