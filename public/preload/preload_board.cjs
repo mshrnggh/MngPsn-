@@ -1,20 +1,23 @@
 // @ts-nocheck
 const { contextBridge, ipcRenderer } = require('electron');
 const { v4: uuidv4 } = require('uuid');
-contextBridge.exposeInMainWorld('boardAPI', {
+
+contextBridge.exposeInMainWorld('postAPI', {
   addNoteToLocalDB: (note) => {
     const data = {
       id: uuidv4(),
-      'title:': note.title + ' :straged at Local DB',
-      'content:': note.content,
-      CreatedAt: new Date(),
-    };
+      title: note.title,
+      content: note.content,
+      straged:'at Local DB',
+      createdAt: new Date(),
+    }; 
     ipcRenderer.send('add-note-to-localdb', data);
   },
   addNoteToMongoDB: (note) => {
     const data = {
-      title: note.title + ' :straged at Mongo DB', 
+      title: note.title, 
       content: note.content,
+      straged:'at Mongo DB',
     };
     ipcRenderer.send('add-note-to-mongodb', data);
   },
@@ -26,3 +29,17 @@ contextBridge.exposeInMainWorld('boardAPI', {
   }
 });
 
+contextBridge.exposeInMainWorld('getAPI', {
+  requestAllThreadsAPI: async () => {
+    const data = await ipcRenderer.send('get-AllThreads');
+    return data;
+  },
+  getAllThreadsAPI: async () => {
+    const data = await new Promise((resolve, reject) => {
+      ipcRenderer.on('get-AllThreads-reply', (event, ...args) => {
+      resolve(args[0]);
+      });
+    });
+    return data;
+  }
+});

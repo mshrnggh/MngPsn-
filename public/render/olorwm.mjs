@@ -1,24 +1,23 @@
 // @ts-nocheck
-document.addEventListener('DOMContentLoaded', async () => {
-  let onMongoButtonAdd = null;
-  let onMongoButtonRemove = null;
-  await window.boardAPI.send('get-DBdata',);
-  await window.boardAPI.receive('get-DBdata', (data) => {
-    console.log('data ', data);
-    const olBClicked = data.olocalButtonClicked;
-    const wmBClicked = data.wmngdbButtonClicked;
-  
-    if (olBClicked === true) {
-      removeMongoButton();
-      addMongoButton('UseMongo');
-    } 
+let olBClicked = false;
+let wmBClicked = false;
+document.addEventListener('DOMContentLoaded', () => {
+  window.postAPI.send('get-DBdata');
+  window.postAPI.receive('get-DBdata-reply', (data) => {
+    olBClicked = data.a;
+    wmBClicked = data.b;
+        
+      if (olBClicked === true) {
+        removeMongoButton();
+        addMongoButton('UseMongo');
+      } 
 
-    const useMongo = document.getElementById('to_mongoConfig');
-    if (useMongo!==null){
-      useMongo.addEventListener('click', () => {
-      window.boardAPI.send('useMongoDB');
-      }); 
-    }
+      const useMongo = document.getElementById('to_mongoConfig');
+      if (useMongo!==null){
+        useMongo.addEventListener('click', () => {
+        window.postAPI.send('useMongoDB');
+        }); 
+      }
   });
 });
 

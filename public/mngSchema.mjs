@@ -11,6 +11,10 @@ const threadSchema = new mongoose.Schema({
     type: String,
     required: true,
   },
+  straged: {
+    type: String,
+    required: true,
+  },
 });
 
 const Thread = mongoose.model("Thread", threadSchema);

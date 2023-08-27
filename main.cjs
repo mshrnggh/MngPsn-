@@ -13,10 +13,9 @@ const {startUp, subConfig} = require(path.join(__dirname, './public/mainProcess/
 const {fork} = require('child_process');
 const startupProcess = fork(path.join(__dirname, './public/mainProcess/startup.cjs'));
 const serverProcess = fork(path.join(__dirname, './public/mainProcess/server.cjs'));
+const postIPCProcess = fork(path.join(__dirname, './public/mainProcess/postIPC.cjs'));
 app.disableHardwareAcceleration(); //hardware acceleration無効化before app is ready or app.whenReady()
-app.whenReady().then(() => {    
-  startUp();
-});
+app.whenReady().then(() => {startUp();});
 ipcMain.handle('startup-config-data', async (event, data) => {
   const a = await data.mongodbUriValue||'';
   const b = await data.wmngdbButtonClicked;
@@ -24,39 +23,24 @@ ipcMain.handle('startup-config-data', async (event, data) => {
   const {getStartupWindow} = await require(path.join(__dirname, './public/mainProcess/startup.cjs'));
   let startupWindow = getStartupWindow();
   // startupWindowが定義されるまで待つ
-  await new Promise((resolve) => {
-    if (startupWindow) { resolve();
-    } else {
-      app.on('browser-window-created', (event, window) => {
-        console.log('window ', window);
-        if (window === startupWindow) {
-          console.log('startupWindow ', startupWindow, 'window ', window);
+  await new Promise((resolve) => {if (startupWindow) { resolve();
+    } else {app.on('browser-window-created', (event, window) => {console.log('window ', window);
+        if (window === startupWindow) {console.log('startupWindow ', startupWindow, 'window ', window);
           resolve();
         }
-      });
-    }
+      });}
   });
   await app.whenReady().then(() => {
     const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
     startServer(a,b,c);
   });
-  await new Promise((resolve) => {
-    setTimeout(() => {
-      resolve();
-    }, 1000); // 1秒待機
+  await new Promise((resolve) => {setTimeout(() => {resolve();}, 1000);//1秒待機
   });
-  if(startupWindow) {
-    startupWindow.close();
-    startupWindow = null;
-  }
-  return data;
+  if(startupWindow) {startupWindow.close();startupWindow = null;}return data;
 });
-
 ipcMain.on('useMongoDB', async (event) => {
   const {getBoardWindow} = await require(path.join(__dirname, './public/mainProcess/server.cjs'));
-  app.whenReady().then(() => {
-    subConfig();
-  });
+  app.whenReady().then(() => {subConfig();});
   let boardWindow = getBoardWindow();
   boardWindow.close();
   boardWindow = null;
@@ -72,8 +56,7 @@ ipcMain.handle('sub-config-data', async (event, data) => {
   // startupWindowが定義されるまで待つ
   await new Promise((resolve) => {
     if (subConfigWindow) { resolve();
-    } else {
-      app.on('browser-window-created', (event, window) => {
+    } else {app.on('browser-window-created', (event, window) => {
         console.log('window ', window);
         if (window === subConfigWindow) {
           console.log('subConfigWindow ', subConfigWindow, 'window ', window);
@@ -82,31 +65,16 @@ ipcMain.handle('sub-config-data', async (event, data) => {
       });
     }
   });
-  if(subConfigWindow) {
-    subConfigWindow.close();
-    subConfigWindow = null;
-  }
+  if(subConfigWindow) {subConfigWindow.close();subConfigWindow = null;}
   await app.whenReady().then(() => {
     const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
-    console.log(a,b,c);
-    startServer(a,b,c);
-  });
-  return data;
+    startServer(a,b,c);});return data;
 });
-
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+app.on('window-all-closed', () => {if (process.platform !== 'darwin') {app.quit();}
 });
 //以下は、macのみのコード
-if (process.platform === 'darwin') {
-  app.on('window-all-closed', () => {
-    app.quit();
-  });
-  app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();}
-    });
+if (process.platform === 'darwin') {app.on('window-all-closed', () => {app.quit();});
+  app.on('activate', () => {if (BrowserWindow.getAllWindows().length === 0) {
+      createWindow();}});
 }
  

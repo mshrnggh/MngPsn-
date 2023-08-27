@@ -1,4 +1,6 @@
-const { ipcMain} = require("electron");
+const {getConfToModuleFile, registerToLocalDB, registerToMongoDB} = require('./postIPC.cjs');
+const {getAllThreads} = require('../mainProcess/getIPC.cjs');
+const {ipcMain} = require("electron");
 const fs = require("fs");
 const path = require("path");
 const url = require('url');
@@ -12,20 +14,18 @@ let boardWindow;
 let mongodbUriValue="";
 let wmngdbButtonClicked=false;
 let olocalButtonClicked=false;
-function startServer(mongodbUriValue,wmngdbButtonClicked,olocalButtonClicked) { 
+
+async function startServer(mongodbUriValue,wmngdbButtonClicked,olocalButtonClicked) { 
   if (wmngdbButtonClicked === true) {
     mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
     if (mongodbUriValue) {
-      useMongoDB(mongodbUriValue||process.env.MONGO_URI).then(() => {
-      
-    }).catch((error) => {
-       console.error(error);
-    });
-    } else if(olocalButtonClicked===true){
+      try { await useMongoDB(mongodbUriValue||process.env.MONGO_URI); 
+    } catch(error) { console.error(error); }
+  } else if (olocalButtonClicked===true){
     nouseMngdb();
     }
   }
-   createBoard(olocalButtonClicked, wmngdbButtonClicked);
+   await createBoard(olocalButtonClicked, wmngdbButtonClicked);
 };
 function useMongoDB(mongodbUriValue, res) { 
   if (mongodbUriValue === process.env.MONGO_URI){
@@ -67,12 +67,10 @@ function useMongoDB(mongodbUriValue, res) {
   }
 }
 function nouseMngdb(){ipcMain.on('nouseMongodb', (event)=>{event.reply('今回はMongoDBを使いません。')});}
-function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
-  const { BrowserWindow, app, ipcMain } = require("electron");
+async function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
+  const { BrowserWindow, app } = require("electron");
   let Thread;
-  import('../mngSchema.mjs').then(module => {
-    Thread = module.Thread;
-  });
+  await import('../mngSchema.mjs').then(module => {Thread = module.Thread;});
    app.commandLine.appendSwitch('disable-gpu');
    app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
    app.commandLine.appendSwitch('enable-software-rasterizer');
@@ -84,7 +82,7 @@ function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
        worldSafeExecuteJavaScript: true, 
        useAngle:false,
        enableRemoteModule: false, 
-       preload: path.join(__dirname, '../preload/preload_board.cjs'),
+       preload: path.join(__dirname, '../preload/preload_board.cjs'),    
        webSecurity: true, 
        allowRunningInsecureContent: false, 
        contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
@@ -95,33 +93,9 @@ function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
       protocol: 'file:',
       slashes: true
    }));
-   ipcMain.removeAllListeners('get-DBdata');
-   ipcMain.on('get-DBdata', (event) => {
-     const data = {olocalButtonClicked,wmngdbButtonClicked};
-     event.reply('get-DBdata', data);
-   });
-   ipcMain.removeAllListeners('add-note-to-localdb');
-   ipcMain.on('add-note-to-localdb', (event, data) => {
-      const filePath = path.join(__dirname, '../localData.json');
-      fs.readFile(filePath, (err, fileData) => {
-        if (err) throw err;
-        const existingData = JSON.parse(fileData);
-        const newData = Array.isArray(existingData) ? [...existingData, data] : [data];
-        fs.writeFile(filePath, JSON.stringify(newData, null, 2), (err) => {
-          if (err) throw err;
-          console.log('Data saved to local DB');
-        });
-      });
-    });
-    ipcMain.removeAllListeners('add-note-to-mongodb');
-    ipcMain.on('add-note-to-mongodb', (event, data) => {
-      const newData = new Thread({
-        title: data.title,
-        content: data.content,
-      });
-      newData.save()
-      .then(() => console.log('Data saved to MongoDB'))
-      .catch((err) => console.error(err));
-    });
-  };
-  module.exports = {startServer, getBoardWindow: () => boardWindow};
+  await getConfToModuleFile(olocalButtonClicked, wmngdbButtonClicked);
+  await getAllThreads(olocalButtonClicked, wmngdbButtonClicked);
+  await registerToLocalDB(olocalButtonClicked, wmngdbButtonClicked);
+  await registerToMongoDB(olocalButtonClicked, wmngdbButtonClicked);  
+};
+module.exports = {startServer, getBoardWindow: () => boardWindow};

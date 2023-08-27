@@ -46,9 +46,8 @@ function flipNotepad(event,submittedId) {
 
 function addNoteToDB(note, submittedId) {
   if (submittedId === 'submitLocal') {
-    window.boardAPI.addNoteToLocalDB(note);
-    
+    window.postAPI.addNoteToLocalDB(note);
   } else if (submittedId === 'submitMongoDB') {
-    window.boardAPI.addNoteToMongoDB(note);
-  }
+    window.postAPI.addNoteToMongoDB(note);
+  };
 }

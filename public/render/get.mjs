@@ -1,47 +1,41 @@
-// data fetching
-const inputTextDOM = document.getElementById("inputTitle");
-const inputContentDOM = document.getElementById("inputContent");
-//formDomを追加する。
-const formDOM = document.querySelector(".form-section");
-const threadSectionDOM = document.querySelector(".thread-section");
-
-
-//最初はThreadを全て読み込む
-const getAllThreads = async () => {
+let olBClicked = false;
+let wmBClicked = false;
+let viapostIPC = 'getloaded';
+document.addEventListener('DOMContentLoaded', () => showBoardList(viapostIPC));
+async function showBoardList(viapostIPC) {
+  await window.getAPI.requestAllThreadsAPI();
+  const threadsData = await window.getAPI.getAllThreadsAPI().then((data)=>{return data;});
+  console.log('threadData arrived at getmjs ', threadsData);
   try {
-    console.log("Show all data");
-    let allThreads = await axios.get("/api/v1/threads");
-    //console.log(allThreads);
-    let { data } = allThreads;
-    //出力
-    allThreads = data.map((thread) => {
-      const { title, content } = thread;
-      //console.log(title);
-      return `
-      <div class="single-thread">
-          <h3>${title}</h3>
-          <p>${content}</p>
-        </div>
-      `;
-    });
-    //.join("");
-    //挿入
-    threadSectionDOM.innerHTML = allThreads;
-  } catch (err) {
-    console.log(err);
-  }
-};
-
-getAllThreads();
-
-//タイトルと内容を打ち込んだらpostメソッドを実装してデータ追加。
-if (inputTextDOM) {
-  inputTextDOM.addEventListener("change", (e) => {
-    inputText = e.target.value;
+    await window.postAPI.receive('get-DBdata-reply', async (data) => {
+      console.log('data.a, data.b at getmjs ', data.a, data.b);
+      olBClicked = data.a;
+      wmBClicked = data.b;
+      const threadSection = document.querySelector('.thread-section');
+      console.log('viapostIPC in showBoardList func. ', viapostIPC);
+      if(viapostIPC === 'postreloaded') {
+        const existingBoardList = document.querySelector('.board-list');
+        if (existingBoardList) {
+          existingBoardList.remove();
+        }};
+        const allThreads = await createBoardList(threadsData);
+        console.log('allThreads ', allThreads);
+        threadSection.appendChild(allThreads);
+      }); await window.postAPI.send('get-DBdata');
+    } catch (err) {console.log('err at getmjs ', err);}}
+      async function createBoardList(threadsData) {
+        console.log('threadsData at createBoardList ', threadsData);
+        try {
+          const allThreadsarr = Array.from(threadsData);
+  const boardList = await document.createElement('div');
+  boardList.classList.add('board-list');
+  allThreadsarr.forEach((thread) => {
+    const boardItem = document.createElement('div');
+    boardItem.classList.add('singleThread');
+    boardItem.textContent = thread.title;console.log('boardItem ', boardItem);
+    boardList.appendChild(boardItem);console.log('boardList ', boardList);
   });
+  return boardList; } catch (err) {console.log('err at createBoardList ', err);}
 }
-if (inputContentDOM) {
-  inputContentDOM.addEventListener("change", (e) => {
-    contentText = e.target.value;
-  });
-}
+window.postAPI.receive('reloadAllThreads', (viapostIPC) => { showBoardList(viapostIPC);});
+export {showBoardList, createBoardList, olBClicked, wmBClicked};
