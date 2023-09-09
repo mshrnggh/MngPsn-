@@ -3,43 +3,55 @@ const { contextBridge, ipcRenderer } = require('electron');
 const { v4: uuidv4 } = require('uuid');
 
 contextBridge.exposeInMainWorld('postAPI', {
-  addNoteToLocalDB: (note) => {
+  addToLocalDB: async (note) => {
     const data = {
-      id: uuidv4(),
+      id: await uuidv4(),
       title: note.title,
       content: note.content,
       straged:'at Local DB',
-      createdAt: new Date(),
-    }; 
-    ipcRenderer.send('add-note-to-localdb', data);
+      createdAt: await new Date(),
+    };
+    console.log('before add-to-localdb event ', data);
+    return await ipcRenderer.invoke('add-to-localdb', data);
   },
-  addNoteToMongoDB: (note) => {
+  addToMongoDB: async (note) => {
     const data = {
       title: note.title, 
       content: note.content,
       straged:'at Mongo DB',
     };
-    ipcRenderer.send('add-note-to-mongodb', data);
+    console.log('data before add-to-mongo event ', data);
+    return await ipcRenderer.invoke('add-to-mongodb', data);
   },
-  send: (channel, data) => {
-    ipcRenderer.send(channel, data);
+  send: async (channel, data) => {
+    await ipcRenderer.removeAllListeners(channel);
+    await ipcRenderer.send(channel, data);
+    console.log(`${channel} is sent with data`, data);
   },
-  receive: (channel, func) => {
-    ipcRenderer.on(channel, (event, ...args) => func(...args));
+  receive: async (channel, func) => { 
+    await ipcRenderer.removeAllListeners(channel);
+    ipcRenderer.once(channel, async (event, ...args) => { 
+      console.log(`${channel} is on with args`, args); 
+      await func(...args);});
+  },
+  reloadAllData: async () => {
+    await ipcRenderer.removeAllListeners('reload-allData');
+    //await ipcRenderer.send('reload-allData');
+    console.log('before reload-allData is on');
+    const data = await new Promise( (resolve, reject) => {
+      ipcRenderer.on('reload-allData', (event, ...args) => { 
+        resolve(args);
+      });}); console.log('data from reloadAllData: ', data) ;return data;
   }
 });
 
 contextBridge.exposeInMainWorld('getAPI', {
-  requestAllThreadsAPI: async () => {
-    const data = await ipcRenderer.send('get-AllThreads');
-    return data;
-  },
-  getAllThreadsAPI: async () => {
-    const data = await new Promise((resolve, reject) => {
-      ipcRenderer.on('get-AllThreads-reply', (event, ...args) => {
-      resolve(args[0]);
-      });
-    });
-    return data;
-  }
+  AllThreadsAPI: async () => {
+    await ipcRenderer.removeAllListeners('get-AllThreads');
+    await ipcRenderer.send('get-AllThreads');
+    const data = await new Promise ((resolve, reject) => {
+      ipcRenderer.once('get-AllThreads', (event, ...args) => { 
+      resolve(args);
+      });}); return data;
+  } 	
 });

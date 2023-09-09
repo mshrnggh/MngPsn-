@@ -1,5 +1,5 @@
-const {getConfToModuleFile, registerToLocalDB, registerToMongoDB} = require('./postIPC.cjs');
-const {getAllThreads} = require('../mainProcess/getIPC.cjs');
+const {getConfToMJS, registLocal, registMongo} = require('./postIPC.cjs');
+const {getAllThreadsIPC} = require('../mainProcess/getIPC.cjs');
 const {ipcMain} = require("electron");
 const fs = require("fs");
 const path = require("path");
@@ -12,22 +12,22 @@ appExpr.use(express.json());
 const mongoose = require("mongoose");
 let boardWindow;
 let mongodbUriValue="";
-let wmngdbButtonClicked=false;
-let olocalButtonClicked=false;
+let wm=false;
+let ol=false;
 
-async function startServer(mongodbUriValue,wmngdbButtonClicked,olocalButtonClicked) { 
-  if (wmngdbButtonClicked === true) {
-    mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
+async function startServer(mongodbUriValue, wm, ol) { 
+  if (wm === true) {
+    mongodbUriValue = await mongodbUriValue||process.env.MONGO_URI;
     if (mongodbUriValue) {
       try { await useMongoDB(mongodbUriValue||process.env.MONGO_URI); 
     } catch(error) { console.error(error); }
-  } else if (olocalButtonClicked===true){
+  } else if (ol === true){
     nouseMngdb();
     }
   }
-   await createBoard(olocalButtonClicked, wmngdbButtonClicked);
+   await createBoard(ol, wm);
 };
-function useMongoDB(mongodbUriValue, res) { 
+async function useMongoDB(mongodbUriValue, res) { 
   if (mongodbUriValue === process.env.MONGO_URI){
     return new Promise((resolve, reject) => {
       mongoose.connect(process.env.MONGO_URI, { useNewUrlParser: true, useUnifiedTopology: true })
@@ -45,16 +45,16 @@ function useMongoDB(mongodbUriValue, res) {
   } else if (mongodbUriValue && mongodbUriValue !== process.env.MONGO_URI) {
     return new Promise((resolve, reject) => {
       mongoose.connect(mongodbUriValue, { useNewUrlParser: true, useUnifiedTopology: true })
-      .then(() => {
-        ipcMain.on('connecttomongodb', (event)=> {event.reply("Connected to MongoDB Atlas");});
+      .then( async () => {
+        ipcMain.on('connecttomongodb', async (event)=> {event.reply("Connected to MongoDB Atlas");});
         process.env.MONGO_URI = mongodbUriValue;
         const envPath = path.join(__dirname, '.env');
-        const envContent = fs.readFileSync(envPath, 'utf-8');
-        const newEnvContent = envContent.replace(`MONGO_URI=${process.env.MONGO_URI}`, `MONGO_URI=${mongodbUriValue}`);
-        fs.writeFileSync(envPath, newEnvContent);
-        const server = appExpr.listen(process.env.PORT, () => {
-          ipcMain.on('serveron', (event)=> {event.reply(`Server running on port ${process.env.PORT}`);});
-          resolve(server);
+        const envContent = await fs.readFileSync(envPath, 'utf-8');
+        const newEnvContent = await envContent.replace(`MONGO_URI=${process.env.MONGO_URI}`, `MONGO_URI=${mongodbUriValue}`);
+        await fs.writeFileSync(envPath, newEnvContent);
+        const server = await appExpr.listen(process.env.PORT, () => {
+          ipcMain.on('serveron', async (event)=> { event.reply(`Server running on port ${process.env.PORT}`);});
+          resolve (server);
         });
       })
       .catch(error => {
@@ -67,35 +67,35 @@ function useMongoDB(mongodbUriValue, res) {
   }
 }
 function nouseMngdb(){ipcMain.on('nouseMongodb', (event)=>{event.reply('今回はMongoDBを使いません。')});}
-async function createBoard(olocalButtonClicked,wmngdbButtonClicked) {
-  const { BrowserWindow, app } = require("electron");
-  let Thread;
+async function createBoard(ol,wm) {
+  const { BrowserWindow, app } = await require("electron");
+  let Thread = '';
   await import('../mngSchema.mjs').then(module => {Thread = module.Thread;});
-   app.commandLine.appendSwitch('disable-gpu');
-   app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
-   app.commandLine.appendSwitch('enable-software-rasterizer');
-   boardWindow = new BrowserWindow({
-     fullscreen: true,
-     webPreferences: {
-       nodeIntegration: true, 
-       contextIsolation: true,
-       worldSafeExecuteJavaScript: true, 
-       useAngle:false,
-       enableRemoteModule: false, 
-       preload: path.join(__dirname, '../preload/preload_board.cjs'),    
-       webSecurity: true, 
-       allowRunningInsecureContent: false, 
-       contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
-     },
+  await app.commandLine.appendSwitch('disable-gpu');
+  await app.commandLine.appendSwitch('disable-features', 'RendererCodeIntegrity');
+  await app.commandLine.appendSwitch('enable-software-rasterizer');
+  boardWindow = await new BrowserWindow({
+    fullscreen: true,
+    webPreferences: {
+      nodeIntegration: true, 
+      contextIsolation: true,
+      worldSafeExecuteJavaScript: true, 
+      useAngle:false,
+      enableRemoteModule: false, 
+      preload: path.join(__dirname, '../preload/preload_board.cjs'),    
+      webSecurity: true, 
+      allowRunningInsecureContent: false, 
+      contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
+    },
    });
    boardWindow.loadURL(url.format({
-      pathname: path.join(__dirname, '../render/index.html'),
-      protocol: 'file:',
-      slashes: true
+     pathname: path.join(__dirname, '../render/index.html'),
+     protocol: 'file:',
+     slashes: true
    }));
-  await getConfToModuleFile(olocalButtonClicked, wmngdbButtonClicked);
-  await getAllThreads(olocalButtonClicked, wmngdbButtonClicked);
-  await registerToLocalDB(olocalButtonClicked, wmngdbButtonClicked);
-  await registerToMongoDB(olocalButtonClicked, wmngdbButtonClicked);  
+  await getConfToMJS(ol, wm);
+  await getAllThreadsIPC(ol, wm);
+  ipcMain.handle('add-to-localdb', async (event, data) => { return await registLocal(ol, wm, event, data);});
+  ipcMain.handle('add-to-mongodb', async (event, data) => { return await registMongo(ol, wm, event, data);});
 };
 module.exports = {startServer, getBoardWindow: () => boardWindow};

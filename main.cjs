@@ -18,8 +18,8 @@ app.disableHardwareAcceleration(); //hardware acceleration無効化before app is
 app.whenReady().then(() => {startUp();});
 ipcMain.handle('startup-config-data', async (event, data) => {
   const a = await data.mongodbUriValue||'';
-  const b = await data.wmngdbButtonClicked;
-  const c = await data.olocalButtonClicked;
+  const b = await data.wm;
+  const c = await data.ol;
   const {getStartupWindow} = await require(path.join(__dirname, './public/mainProcess/startup.cjs'));
   let startupWindow = getStartupWindow();
   // startupWindowが定義されるまで待つ
@@ -36,45 +36,45 @@ ipcMain.handle('startup-config-data', async (event, data) => {
   });
   await new Promise((resolve) => {setTimeout(() => {resolve();}, 1000);//1秒待機
   });
-  if(startupWindow) {startupWindow.close();startupWindow = null;}return data;
+  if(startupWindow) {startupWindow.close();startupWindow = null;}; return data;
 });
 ipcMain.on('useMongoDB', async (event) => {
   const {getBoardWindow} = await require(path.join(__dirname, './public/mainProcess/server.cjs'));
-  app.whenReady().then(() => {subConfig();});
-  let boardWindow = getBoardWindow();
-  boardWindow.close();
+  app.whenReady().then( async () => { await subConfig();});
+  let boardWindow = await getBoardWindow();
+  await boardWindow.close();
   boardWindow = null;
   return;
 });
 
 ipcMain.handle('sub-config-data', async (event, data) => {
-  const a = await data.mongodbUriValue||'';
-  const b = await data.wmngdbButtonClicked;
-  const c = await data.olocalButtonClicked;
+  const a = data.mongodbUriValue||'';
+  const b = data.wm;
+  const c = data.ol;
   const {getSubConfigWindow} = await require(path.join(__dirname, './public/mainProcess/startup.cjs'));
-  let subConfigWindow = getSubConfigWindow();
+  let subConfigWindow = await getSubConfigWindow();
   // startupWindowが定義されるまで待つ
-  await new Promise((resolve) => {
-    if (subConfigWindow) { resolve();
-    } else {app.on('browser-window-created', (event, window) => {
+  await new Promise( async (resolve) => {
+    if (subConfigWindow) { await resolve();
+    } else {app.on('browser-window-created', async (event, window) => {
         console.log('window ', window);
         if (window === subConfigWindow) {
           console.log('subConfigWindow ', subConfigWindow, 'window ', window);
-          resolve();
+          await resolve();
         }
       });
     }
   });
-  if(subConfigWindow) {subConfigWindow.close();subConfigWindow = null;}
-  await app.whenReady().then(() => {
+  if(subConfigWindow) {await subConfigWindow.close(); subConfigWindow = null;}
+  await app.whenReady().then( async () => {
     const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
-    startServer(a,b,c);});return data;
+    await startServer(a,b,c);}); return data;
 });
-app.on('window-all-closed', () => {if (process.platform !== 'darwin') {app.quit();}
+app.on('window-all-closed', async () => {if (process.platform !== 'darwin') {await app.quit();}
 });
 //以下は、macのみのコード
-if (process.platform === 'darwin') {app.on('window-all-closed', () => {app.quit();});
-  app.on('activate', () => {if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();}});
+if (process.platform === 'darwin') {app.on('window-all-closed', async () => {await app.quit();});
+  app.on('activate', async () => {if (BrowserWindow.getAllWindows().length === 0) {
+      await createWindow();}});
 }
  

@@ -4,8 +4,8 @@ window.addEventListener('DOMContentLoaded', () => {
   confSubmit.addEventListener('submit', (event) => {
     event.preventDefault();
     window.subConfigAPI.subConfig({
-      wmngdbButtonClicked: true,
-      olocalButtonClicked: false,
+      wm: true,
+      ol: false,
       mongodbUriValue,
     }).then(() => {
       window.alert('sub-config data sent successfully');

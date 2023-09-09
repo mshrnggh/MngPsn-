@@ -1,36 +1,31 @@
 // @ts-nocheck
 let olBClicked = false;
 let wmBClicked = false;
-document.addEventListener('DOMContentLoaded', () => {
-  window.postAPI.send('get-DBdata');
-  window.postAPI.receive('get-DBdata-reply', (data) => {
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.postAPI.send('get-DBdata');
+  await window.postAPI.receive('get-DBdata', async (data) => {
     olBClicked = data.a;
     wmBClicked = data.b;
-        
-      if (olBClicked === true) {
-        removeMongoButton();
-        addMongoButton('UseMongo');
-      } 
-
-      const useMongo = document.getElementById('to_mongoConfig');
-      if (useMongo!==null){
-        useMongo.addEventListener('click', () => {
-        window.postAPI.send('useMongoDB');
+    if (olBClicked === true) { await removeMongoButton(); await addMongoButton('UseMongo');} 
+    const useMongo = document.getElementById('to_mongoConfig');
+    if (useMongo!==null){
+        await useMongo.addEventListener('click', async () => {
+          await window.postAPI.send('useMongoDB');
         }); 
-      }
+    }
   });
 });
 
-function removeMongoButton() {
+async function removeMongoButton() {
   const mongoButton = document.querySelector('#submitMongoDB');
   if (mongoButton) {
-    mongoButton.remove();
+    await mongoButton.remove();
   } else {
-    window.alert('mongoButton element not found');
+    await window.alert('mongoButton element not found');
   }
 }
 
-function addMongoButton(arg) {
+async function addMongoButton(arg) {
   const form = document.querySelector('.form-section');
   if (form) {
     const mongoButton = document.createElement('button');
@@ -46,30 +41,30 @@ function addMongoButton(arg) {
     mongoButton.disabled = false;
     mongoButton.style.visibility = 'visible';
     console.log(mongoButton);
-    form.appendChild(mongoButton);
+    await form.appendChild(mongoButton);
   } else {
-    window.alert('.form-section element not found');
+    await window.alert('.form-section element not found');
   }
 }
 
-function onMongoButtonRemove(callback) {
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
+async function onMongoButtonRemove(callback) {
+  const observer = await new MutationObserver(async (mutations) => {
+    await mutations.forEach(async (mutation) => {
       if (mutation.type === 'childList' && mutation.removedNodes.length > 0) {
-        callback();
+        await callback();
       }
     });
   });
-  observer.observe(document.body, { childList: true });
+  await observer.observe(document.body, { childList: true });
 }
 
-function onMongoButtonAdd(callback) {
-  const observer = new MutationObserver((mutations) => {
-    mutations.forEach((mutation) => {
+async function onMongoButtonAdd(callback) {
+  const observer = await new MutationObserver(async (mutations) => {
+    await mutations.forEach(async (mutation) => {
       if (mutation.type === 'childList' && mutation.addedNodes.length > 0) {
-        callback();
+        await callback();
       }
     });
   });
-  observer.observe(document.body, { childList: true });
+  await observer.observe(document.body, { childList: true });
 }

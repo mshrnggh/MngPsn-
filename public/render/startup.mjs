@@ -2,8 +2,8 @@ const wmngdbButton = document.querySelector('.WMngdb');
 const olocalButton = document.querySelector('.OLocal');
 const mongodbConf = document.getElementById('mongodb-conf');
 const config = document.querySelector('.config');
-let wmngdbButtonClicked = false;
-let olocalButtonClicked = false;
+let wm = false;
+let ol = false;
 let mongodbUriValue = '';
 
 //MongoDBも使う場合
@@ -11,12 +11,11 @@ wmngdbButton.addEventListener('click', () => {
   mongodbConf.style.display = 'block';
   config.style.display = 'block';
   wmngdbButton.disabled = true;
-  olocalButton.disabled = true;
-  wmngdbButtonClicked = true;
+  wm = true;
   mongodbUriValue = document.getElementById('mongodb-uri').value;
   window.startUpAPI.sendToMain('start-server', {
-    wmngdbButtonClicked,
-    olocalButtonClicked,
+    wm,
+    ol,
     mongodbUriValue,
   });
 });
@@ -26,10 +25,10 @@ olocalButton.addEventListener('click', () => {
   config.style.display = 'none';
   wmngdbButton.disabled = true;
   olocalButton.disabled = true;
-  olocalButtonClicked = true;
+  ol = true;
   window.startUpAPI.sendConfig({
-    wmngdbButtonClicked,
-    olocalButtonClicked,
+    wm,
+    ol,
     mongodbUriValue,
     });
 });
@@ -38,10 +37,9 @@ window.addEventListener('DOMContentLoaded', () => {
   const confSubmit = document.querySelector('.conf-submit');
   confSubmit.addEventListener('submit', (event) => {
     event.preventDefault();
-    console.log(wmngdbButtonClicked, olocalButtonClicked, mongodbUriValue)
     window.startUpAPI.sendConfig({
-      wmngdbButtonClicked,
-      olocalButtonClicked,
+      wm,
+      ol,
       mongodbUriValue,
     }).then(() => {
       window.alert('Config data sent successfully');
