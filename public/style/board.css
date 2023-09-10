@@ -27,6 +27,19 @@ body {
   margin-bottom: 20px;
   text-shadow: -1px -1px -1px #341903c6, -5px -5px 1px #100903c6, -5px -5px 1px #000, -5px -5px 3px #673209;
 }
+
+.board-columns {
+  display: flex;
+  justify-content: space-between;
+}
+
+.board-column {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+.board-list{ display:flex;}
+
 .thread-section {
   width: 80%;
   left:10px;
@@ -37,14 +50,17 @@ body {
 .thread-section .singleThread {
   background-image: url('../images/notepad.png');
   background-repeat: no-repeat;
-  box-shadow: 5px 5px 35px #040404;
-  width:26%;
+  box-shadow: 3px 3px 15px #040404; 
+  width:80%;
   border-radius: 15px;
   padding: 15px 25px;
   margin-top:10px;
   margin-bottom: 10px;
   margin-right:10px;
   margin-left:10px;
+  text-shadow: none;
+  font-weight: bold;
+  z-index:1
 }
 .notePadBackground {
   background-position: top left, top right, bottom left;
