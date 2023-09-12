@@ -38,6 +38,7 @@ ipcMain.handle('startup-config-data', async (event, data) => {
   });
   if(startupWindow) {startupWindow.close();startupWindow = null;}; return data;
 });
+
 ipcMain.on('useMongoDB', async (event) => {
   const {getBoardWindow} = await require(path.join(__dirname, './public/mainProcess/server.cjs'));
   app.whenReady().then( async () => { await subConfig();});
@@ -51,30 +52,25 @@ ipcMain.handle('sub-config-data', async (event, data) => {
   const a = data.mongodbUriValue||'';
   const b = data.wm;
   const c = data.ol;
-  const {getSubConfigWindow} = await require(path.join(__dirname, './public/mainProcess/startup.cjs'));
+  const {getSubConfigWindow} = require(path.join(__dirname, './public/mainProcess/startup.cjs'));
   let subConfigWindow = await getSubConfigWindow();
   // startupWindowが定義されるまで待つ
-  await new Promise( async (resolve) => {
-    if (subConfigWindow) { await resolve();
-    } else {app.on('browser-window-created', async (event, window) => {
-        console.log('window ', window);
-        if (window === subConfigWindow) {
-          console.log('subConfigWindow ', subConfigWindow, 'window ', window);
-          await resolve();
-        }
-      });
-    }
+  await new Promise( (resolve) => {
+    if (subConfigWindow) { resolve();
+    } else {app.on('browser-window-created', (event, window) => {
+      if (window === subConfigWindow) { resolve(); }});};
   });
   if(subConfigWindow) {await subConfigWindow.close(); subConfigWindow = null;}
-  await app.whenReady().then( async () => {
-    const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
-    await startServer(a,b,c);}); return data;
+  app.whenReady(); 
+  const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
+  await startServer(a,b,c); return data;
 });
-app.on('window-all-closed', async () => {if (process.platform !== 'darwin') {await app.quit();}
+
+app.on('window-all-closed', () => {if (process.platform !== 'darwin') {app.quit();}
 });
 //以下は、macのみのコード
-if (process.platform === 'darwin') {app.on('window-all-closed', async () => {await app.quit();});
-  app.on('activate', async () => {if (BrowserWindow.getAllWindows().length === 0) {
-      await createWindow();}});
+if (process.platform === 'darwin') {app.on('window-all-closed', () => {app.quit();});
+  app.on('activate', () => {if (BrowserWindow.getAllWindows().length === 0) {
+  createWindow();}});
 }
  

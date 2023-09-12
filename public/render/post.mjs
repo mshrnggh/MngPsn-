@@ -51,14 +51,12 @@ async function addToDB(note, submittedId, ol, wm) {
   }; 
 }
 async function showReloadList( ol, wm, data ) {
-  try { 
-    const threadSection = document.querySelector('.thread-section');
-    while (threadSection.firstChild) {threadSection.removeChild(threadSection.firstChild);}
-    const allReloadThre = createReloadList(data, ol, wm);
-    console.log('allReloadThre in postmjs', allReloadThre);
-    threadSection.appendChild(allReloadThre);
-    await createReloadColumns(allReloadThre);
-  } catch (err) { console.log('err at postmjs ', err);};
+  const threadSection = document.querySelector('.thread-section');
+  while (threadSection.firstChild) {threadSection.removeChild(threadSection.firstChild);}
+  const allReloadThre = createReloadList(data, ol, wm);
+  console.log('allReloadThre in postmjs', allReloadThre);
+  //threadSection.appendChild(allReloadThre);
+  await createReloadColumns(allReloadThre);
 };
 function createReloadList(data, ol, wm) {
   const allThreadsarr = Array.isArray(data) ? data : [data];
@@ -72,24 +70,25 @@ function createReloadList(data, ol, wm) {
   }; return boardList;
 };  
 
-async function createReloadColumns(allThreads) {
-  const threadItems = allThreads.querySelectorAll('.singleThread');
-  const threadItemsArray = Array.from(threadItems);
-  const threadColumns = [[], [], []];
-  threadItemsArray.forEach((item, index) => {
-    threadColumns[index % 3].push(item);
-  });
-  const boardColumns = await document.createElement('div');
+async function createReloadColumns(reloadData) {
+  const allThreads = reloadData.querySelectorAll('.singleThread');
+  const boardSection = document.createElement('div');
+  boardSection.classList.add('all-threads');
+  const boardColumns = document.createElement('div');
   boardColumns.classList.add('board-columns');
-  for (const column of threadColumns) {
-    const boardColumn = await document.createElement('div');
+  for (let i = 0; i < 3; i++) {
+    const boardColumn = document.createElement('div');
     boardColumn.classList.add('board-column');
-    for (const threadItem of column) {
-      await boardColumn.appendChild(threadItem);
+    const  columnList = document.createElement('div');
+    columnList.classList.add('board-list');
+    for (let j = i; j < allThreads.length; j += 3) {
+      columnList.appendChild(allThreads[j]);
     }
-    await boardColumns.appendChild(boardColumn);
+    boardColumn.appendChild(columnList);
+    boardColumns.appendChild(boardColumn);
   }
+  boardSection.appendChild(boardColumns);
   const threadSection = document.querySelector('.thread-section');
-  threadSection.innerHTML = '';
-  threadSection.appendChild(boardColumns);
+  threadSection.appendChild(boardSection);
+  console.log('boardSection, threadSection at createBoardColumns getmjs ', threadSection);
 }

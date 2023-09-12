@@ -17,15 +17,11 @@ let ol=false;
 
 async function startServer(mongodbUriValue, wm, ol) { 
   if (wm === true) {
-    mongodbUriValue = await mongodbUriValue||process.env.MONGO_URI;
-    if (mongodbUriValue) {
-      try { await useMongoDB(mongodbUriValue||process.env.MONGO_URI); 
+    mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
+    try { useMongoDB(mongodbUriValue); 
     } catch(error) { console.error(error); }
-  } else if (ol === true){
-    nouseMngdb();
-    }
-  }
-   await createBoard(ol, wm);
+  } else if (ol === true){ nouseMngdb(); }
+  await createBoard(ol, wm);
 };
 async function useMongoDB(mongodbUriValue, res) { 
   if (mongodbUriValue === process.env.MONGO_URI){
@@ -68,7 +64,7 @@ async function useMongoDB(mongodbUriValue, res) {
 }
 function nouseMngdb(){ipcMain.on('nouseMongodb', (event)=>{event.reply('今回はMongoDBを使いません。')});}
 async function createBoard(ol,wm) {
-  const { BrowserWindow, app } = await require("electron");
+  const { BrowserWindow, app } = require("electron");
   let Thread = '';
   await import('../mngSchema.mjs').then(module => {Thread = module.Thread;});
   await app.commandLine.appendSwitch('disable-gpu');

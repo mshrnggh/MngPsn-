@@ -16,7 +16,6 @@ async function getAllThreadsIPC(ol, wm) {
               const fileData = await fs.promises.readFile(filePath);
               const localData = JSON.parse(fileData);
               data = await localData.slice(0, 18);
-              console.log('getAllThreIPC-OL: ', data);
             } else if (wm === true) {
               const mongoData = await Thread.find({}, { _id: 1, title: 1 });
               const mongoDataCount = await Thread.countDocuments();
@@ -28,7 +27,6 @@ async function getAllThreadsIPC(ol, wm) {
               const localData = JSON.parse(fileData);
               const localDataLimit = Math.min(18 - mongoDataLimit, localData.length);
               data = [...data, ...localData.slice(0, localDataLimit)];
-              console.log('getAllThreIPC-WM: ', data);
             }
             data = await data.filter((thread) => thread.id || thread._id).slice(0, 18);
             allThreads = await data.map((thread) => {

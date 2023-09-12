@@ -1,5 +1,4 @@
 const { contextBridge, ipcRenderer } = require('electron');
-//window.contextBridge = contextBridge;
 contextBridge.exposeInMainWorld('subConfigAPI', {
   subConfig: (configData) => {
     console.log('subConfigAPI sending configData: ', configData)
