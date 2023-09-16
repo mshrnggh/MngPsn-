@@ -16,6 +16,7 @@ let wm=false;
 let ol=false;
 
 async function startServer(mongodbUriValue, wm, ol) { 
+  console.log('startServer is called, mngURI, wm, ol ', mongodbUriValue, wm, ol);
   if (wm === true) {
     mongodbUriValue = mongodbUriValue||process.env.MONGO_URI;
     try { useMongoDB(mongodbUriValue); 
@@ -91,7 +92,40 @@ async function createBoard(ol,wm) {
    }));
   await getConfToMJS(ol, wm);
   await getAllThreadsIPC(ol, wm);
-  ipcMain.handle('add-to-localdb', async (event, data) => { return await registLocal(ol, wm, event, data);});
-  ipcMain.handle('add-to-mongodb', async (event, data) => { return await registMongo(ol, wm, event, data);});
+  
+  if (ipcMain.eventNames().includes('add-to-localdb') && ipcMain.listenerCount('add-to-localdb') >= 1) {
+    console.log('add-to-localdb listener count', ipcMain.listenerCount('add-to-localdb'));
+    console.log('add-to-localdb event must be removed once');
+    ipcMain.removeAllListeners('add-to-localdb');
+    ipcMain.removeAllListeners('add-to-localdb-reply');
+    console.log('add-to-localdb & reply event is removed once');
+    ipcMain.on('add-to-localdb', async (event, data) => { 
+      console.log('add-to-localdb event2 removed is added again');
+      const newData = await registLocal(ol, wm, event, data); 
+      const serializedData = JSON.parse(JSON.stringify(newData));
+      event.reply('add-to-localdb-reply', serializedData);
+      console.log('add-to-localdb-reply event2 removed is added again and done this time! ');
+    });
+  } else {
+    ipcMain.on('add-to-localdb', async (event, data) => {
+      console.log('add-to-localdb event1 is added');
+      const newData = await registLocal(ol, wm, event, data);
+      const serializedData = JSON.parse(JSON.stringify(newData));
+      event.reply('add-to-localdb-reply', serializedData);});
+      console.log('add-to-localdb-reply event1 is added and done! ');
+  } 
+
+  if (ipcMain.eventNames().includes('add-to-mongodb') && ipcMain.listenerCount('add-to-mongodb') >= 1) {
+    ipcMain.removeAllListeners('add-to-mongodb');
+    ipcMain.on('add-to-mongodb', async (event, data) => { 
+      const newData = await registMongo(ol, wm, event, data);
+      const serializedData = JSON.parse(JSON.stringify(newData));
+      event.reply('add-to-mongodb-reply', serializedData);});
+  } else {
+    ipcMain.on('add-to-mongodb', async (event, data) => { 
+      const newData = await registMongo(ol, wm, event, data);
+      const serializedData = JSON.parse(JSON.stringify(newData));
+      event.reply('add-to-mongodb-reply', serializedData);});
+  }
 };
 module.exports = {startServer, getBoardWindow: () => boardWindow};

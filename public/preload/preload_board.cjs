@@ -3,20 +3,22 @@ const { contextBridge, ipcRenderer } = require('electron');
 const { v4: uuidv4 } = require('uuid');
 contextBridge.exposeInMainWorld('postAPI', {
   addToLocalDB: async (note) => {
-    const data = {
-      id: await uuidv4(),
-      title: note.title,
-      content: note.content,
-      straged:'at Local DB',
-      createdAt: await new Date(),
-    }; return await ipcRenderer.invoke('add-to-localdb', data);
+    const data = {id: await uuidv4(),title: note.title,content: note.content,straged:'at Local DB',createdAt: await new Date(),}; 
+    await ipcRenderer.removeAllListeners('add-to-localdb');
+    await ipcRenderer.removeAllListeners('add-to-localdb-reply');
+    const newDataPromise = new Promise( (resolve, reject) => {
+      ipcRenderer.once('add-to-localdb-reply', (event, ...args) => {
+        resolve(args);}); });
+    await ipcRenderer.send('add-to-localdb', data);
+    const newAllThre = await newDataPromise || Promise.resolve(); 
+    return await newAllThre;
   },
   addToMongoDB: async (note) => {
-    const data = {
-      title: note.title, 
-      content: note.content,
-      straged:'at Mongo DB',
-    }; return await ipcRenderer.invoke('add-to-mongodb', data);
+    const data = {title: note.title,content: note.content,straged:'at Mongo DB'};
+    await ipcRenderer.removeAllListeners('add-to-mongodb');
+    await ipcRenderer.removeAllListeners('add-to-mongodb-reply');
+    await ipcRenderer.send('add-to-mongodb', data);
+    ipcRenderer.on('add-to-mongodb-reply', async (event, arg) => { return await arg;});
   },
   send: async (channel, data) => {
     await ipcRenderer.removeAllListeners(channel);

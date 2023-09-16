@@ -10,26 +10,29 @@
     <div class="board-section">
       <h2>Bulletine Board Application with Local Server and MongoDB</h2>
       <div class="board-container">
-      <!-- ↓この中に挿入していく -->
-      <div class="thread-section"></div>
-      <form class="form-section">
-        <p>TITLE</p>
-        <input type="text" placeholder="Title" id="inputTitle" name="inputTitle" required/>
-        <br />
-        <label
-        >Please describe bellow: <br />
-        <textarea id="inputContent" name="inputContent" placeholder="Description" rows="10" cols="30" required></textarea>
-      </label>
-      <br />
-      <button id="submitLocal" type="submit">Send to Local</button>
-      <button id="submitMongoDB" type="submit">Send to MongoDB</button>
-      <script type="module" src="post.mjs"></script>
-      <script type="module" src="olorwm.mjs"></script>
-      <script type="module" src="get.mjs"></script>
-    </form>
-    <div class="notePadBackground"></div>
-  </div>
-  </div>
-  <link rel="stylesheet" href="../style/board.css">
-</body>
+        <div class="search-section">
+          <textarea id="search-input" placeholder="Search with key words between space ..." name="search-input"></textarea>
+          <button id="search-button">SEARCH</button>
+        </div>
+        <!-- ↓この中に挿入していく -->
+        <div class="thread-section"></div>
+        <form class="form-section">
+          <div class="notePadBackground"></div>
+          <p>Describe a new thread title</p>
+          <input type="text" placeholder="Title" id="inputTitle" name="inputTitle" required/>
+          <br />
+          <label>Please describe new contents bellow: <br />
+            <textarea id="inputContent" name="inputContent" placeholder="Description" rows="10" cols="30" required></textarea>
+          </label>
+          <br />
+          <button id="submitLocal" type="submit">Send to Local DB</button>
+          <button id="submitMongoDB" type="submit">Send to Mongo DB</button>
+          <script type="module" src="post.mjs"></script>
+          <script type="module" src="olorwm.mjs"></script>
+          <script type="module" src="get.mjs"></script>
+        </form>
+      </div>
+    </div>
+      <link rel="stylesheet" href="../style/board.css">
+  </body>
 </html>

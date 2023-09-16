@@ -1,17 +1,10 @@
 let mongodbUriValue = '';
 window.addEventListener('DOMContentLoaded', () => {
   const confSubmit = document.querySelector('.conf-submit');
-  confSubmit.addEventListener('submit', (event) => {
-    event.preventDefault();
-    window.subConfigAPI.subConfig({
-      wm: true,
-      ol: false,
-      mongodbUriValue,
-    }).then(() => {
+  confSubmit.addEventListener('submit', (event) => { event.preventDefault();
+    window.subConfigAPI.subConfig({ wm: true, ol: false, mongodbUriValue}).then(() => {
       window.alert('sub-config data sent successfully');
-    }).catch((error) => {
-      window.alert('Error sending sub-config data:', error);
-    });
+    }).catch((error) => {window.alert('Error sending sub-config data:', error);});
   });
 });
 // in case MongoDB Atlas URI and/or Local port is/are incorrect
