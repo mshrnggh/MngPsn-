@@ -21,7 +21,7 @@
 },
 "devDependencies": {
 "@electron-forge/cli": "^6.2.1",
-"electron": "^25.4.0"
+"electron": "^25.8.1"
 },
 "volta": {
 "node": "18.17.1"
