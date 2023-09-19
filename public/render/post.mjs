@@ -25,7 +25,8 @@ async function flipNotepad(event, submittedId, formSection) {
 };};
 async function addToDB(note, submittedId, formSection, event) {let newAllThre;
   if (submittedId==='submitLocal') {newAllThre=await window.postAPI.addToLocalDB(note)
-  } else if (submittedId==='submitMongoDB') {newAllThre = await window.postAPI.addToMongoDB(note);
+  } else if (submittedId==='submitMongoDB') {
+    newAllThre = await window.postAPI.addToMongoDB(note);
   }; await showReloadList( newAllThre, formSection, event );
 };
 async function showReloadList( data, formSection, event ) {
@@ -36,14 +37,12 @@ async function showReloadList( data, formSection, event ) {
 };
 async function createReloadList(data) {
   const allThreadsarr=Array.isArray(data)&&Array.isArray(data[0])?data.flat():Array.isArray(data)?data:[data];
-  console.log('allThreadsarr at createReloadList getmjs ', allThreadsarr);
   const boardList=document.createElement('div');boardList.classList.add('board-list');
   for (const thread of allThreadsarr) {const boardItem = document.createElement('div');
     boardItem.classList.add('singleThread');let title = thread.title;
     const titleRegex=/^(?:[\x00-\x7F]|[\uFF61-\uFF9F]{2}){0,18}(?:(?![\x00-\x7F]|[\uFF61-\uFF9F]{2}).|$)/;
-    if(titleRegex.test(title)){if(countLength(title)>50) {title=sliceString(title,50)+'...';console.log('title at Regex words limit ', title);}
-    }else{if(countLength(title)>50){title=sliceString(title,50)+'...';console.log('title at non-Regex words limit',title);}}
-    console.log('title at createBoardList getmjs ',title);
+    if(titleRegex.test(title)){if(countLength(title)>50) {title=sliceString(title,50)+'...';}
+    }else{if(countLength(title)>50){title=sliceString(title,50)+'...';}}
     boardItem.textContent = title; boardList.appendChild(boardItem);
   } return boardList;
   function countLength(str){let len=0;for(let i=0;i<str.length;i++){const code=str.charCodeAt(i);
@@ -54,9 +53,8 @@ async function createReloadList(data) {
 };
 async function createReloadColumns(reloadData, formSection, event) {
   const allThreads = reloadData.querySelectorAll('.singleThread');
-  console.log('allThreads at createReloadColumns postmjs ', allThreads);
   const boardColumn=document.createElement('div'); boardColumn.classList.add('board-column');
-  const columnCount = 2; const maxRows = 15;
+  const columnCount = 2; const maxRows = 14;
   const rowCount=Math.ceil(Math.min(allThreads.length,columnCount*maxRows)/columnCount);
   for (let i=0;i<columnCount;i++) {const columnList=document.createElement('div');
     columnList.classList.add('board-list');
@@ -67,5 +65,4 @@ async function createReloadColumns(reloadData, formSection, event) {
   };
   const threadSection = document.querySelector('.thread-section');
   boardColumn.appendChild(formSection); threadSection.appendChild(boardColumn);
-  console.log('threSec, formSec at createReloadColumns postmjs ', formSection, threadSection);
 };

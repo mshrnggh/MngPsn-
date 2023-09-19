@@ -28,20 +28,20 @@ async function postReloadIPC(ol, wm, event){
          const filePath = path.join(__dirname, '../localData.json');
          const  fileData = await fs.promises.readFile(filePath);
          const  localData = JSON.parse(fileData);
-         data = await localData.slice(0, 30)
+         data = await localData.slice(0, 28)
          console.log('reloadThre-OL at postIPC ', data);
        } else if (wm === true) {
          const mongoData = await Thread.find({}, { _id: 1, title: 1 });
          const mongoDataCount = await Thread.countDocuments();
-         const mongoDataLimit = Math.min(mongoDataCount, 15);
+         const mongoDataLimit = Math.min(mongoDataCount, 14);
          mongoData.splice(mongoDataLimit); data = [...mongoData, ...data];
          const filePath = path.join(__dirname, '../localData.json');
          const fileData = await fs.promises.readFile(filePath);
          const localData = JSON.parse(fileData);
-         const localDataLimit = Math.min(30 - mongoDataLimit, localData.length);
+         const localDataLimit = Math.min(28 - mongoDataLimit, localData.length);
          data = [...data, ...localData.slice(0, localDataLimit)];
        }      
-         data = await data.filter((thread) => thread.id || thread._id).slice(0, 30);
+         data = await data.filter((thread) => thread.id || thread._id).slice(0, 28);
          allThreads = await data.map((thread) => {
          const id = thread.id || thread._id.toString();
          const title = thread.title || thread['title:'] || ''; return { id, title };
@@ -51,3 +51,10 @@ async function postReloadIPC(ol, wm, event){
      }); } catch (error) { console.error(error); reject(error); }
 });};
 module.exports = {getConfToMJS, registLocal, registMongo};
+
+
+
+
+
+
+

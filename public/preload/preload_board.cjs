@@ -7,8 +7,7 @@ contextBridge.exposeInMainWorld('postAPI', {
     await ipcRenderer.removeAllListeners('add-to-localdb');
     await ipcRenderer.removeAllListeners('add-to-localdb-reply');
     const newDataPromise = new Promise( (resolve, reject) => {
-      ipcRenderer.once('add-to-localdb-reply', (event, ...args) => {
-        resolve(args);}); });
+      ipcRenderer.once('add-to-localdb-reply',(event,...args)=>{resolve(args);});});
     await ipcRenderer.send('add-to-localdb', data);
     const newAllThre = await newDataPromise || Promise.resolve(); 
     return await newAllThre;
@@ -17,19 +16,21 @@ contextBridge.exposeInMainWorld('postAPI', {
     const data = {title: note.title,content: note.content,straged:'at Mongo DB'};
     await ipcRenderer.removeAllListeners('add-to-mongodb');
     await ipcRenderer.removeAllListeners('add-to-mongodb-reply');
+    const newDataPromise = new Promise( (resolve, reject) => {
+      ipcRenderer.once('add-to-mongodb-reply',(event,...args)=>{resolve(args);});});
     await ipcRenderer.send('add-to-mongodb', data);
-    ipcRenderer.on('add-to-mongodb-reply', async (event, arg) => { return await arg;});
+    const newAllThre = await newDataPromise || Promise.resolve(); 
+    return await newAllThre;
   },
   send: async (channel, data) => {
     await ipcRenderer.removeAllListeners(channel);
     await ipcRenderer.send(channel, data);
     console.log(`${channel} is sent with data`, data);
-  },
-  receive: async (channel, func) => { 
-    await ipcRenderer.removeAllListeners(channel);
-    ipcRenderer.once(channel, async (event, ...args) => { 
-      console.log(`${channel} is on with args`, args); 
-      await func(...args);});
+  }, 
+  receive: async (channel, func) => { await ipcRenderer.removeAllListeners(channel);
+    ipcRenderer.once(channel, async (event, ...args) => {
+      console.log(`${channel} is on with args`, args); await func(...args);
+    });
   }
 });
 contextBridge.exposeInMainWorld('getAPI', {
@@ -39,6 +40,15 @@ contextBridge.exposeInMainWorld('getAPI', {
     const data = await new Promise ((resolve, reject) => {
       ipcRenderer.once('get-AllThreads', (event, ...args) => { 
       resolve(args);
-      });}); return data;
-  } 	
+      });}); return await data;
+  },
+  getResearchAPI: async (ol,wm,keywords) => {
+    await ipcRenderer.removeAllListeners('get-Research');
+    await ipcRenderer.removeAllListeners('get-Research-reply');
+    await ipcRenderer.send('get-Research', ol, wm, keywords);
+    const data = await new Promise ((resolve, reject) => {
+      ipcRenderer.once('get-Research-reply', (event, ...args) => { 
+      resolve(args);
+    });}); return await data;
+  }, 	
 });

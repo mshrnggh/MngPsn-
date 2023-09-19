@@ -8,7 +8,7 @@ async function showBoardList() {const threadsData = await window.getAPI.AllThrea
     await createBoardColumns(allThreads);
   });
 };
-function createBoardList(data) {
+export function createBoardList(data) {
   const allThreadsarr=Array.isArray(data) && Array.isArray(data[0])?data.flat():Array.isArray(data)?data:[data];
   const boardList = document.createElement('div');boardList.classList.add('board-list');
   for (const thread of allThreadsarr) {const boardItem = document.createElement('div');
@@ -24,21 +24,25 @@ function createBoardList(data) {
       if(code>=0x00&&code<=0x7f){count+=1;}else{count+=2;} if(count>len){break;}
       result += str.charAt(i);} return result;};
 };
-async function createBoardColumns(boardList) {
+export async function createBoardColumns(boardList) {
+  let boardColumn = document.querySelector('.board-column');
   const allThreads = boardList.querySelectorAll('.singleThread');
-  const boardColumn = document.createElement('div');
-  boardColumn.classList.add('board-column');
-  const columnCount = 2; const maxRows = 15;
+  boardColumn = document.createElement('div');boardColumn.classList.add('board-column');
+  const columnCount = 2; const maxRows = 14;
   const rowCount=Math.ceil(Math.min(allThreads.length,columnCount*maxRows)/columnCount);
   for (let i=0;i<columnCount;i++){const columnList=document.createElement('div');
     columnList.classList.add('board-list');
-    for(let j=i*rowCount;j<Math.min((i+1)*rowCount,allThreads.length);j++) {
-    {columnList.appendChild(allThreads[j]);
-      if (columnList.children.length>=maxRows){break;};};
-    };boardColumn.appendChild(columnList);
+    for(let j=i*rowCount;j<Math.min((i+1)*rowCount,allThreads.length);j++){
+     columnList.appendChild(allThreads[j]);
+     if(columnList.children.length>=maxRows){break;};};
+    boardColumn.appendChild(columnList);
   };
   const formSection = document.querySelector('.form-section');
   const threadSection = document.querySelector('.thread-section');
-  boardColumn.appendChild(formSection);threadSection.appendChild(boardColumn);
-  console.log('threadSection at createBoardColumns getmjs ', threadSection);
+  if (formSection && threadSection) {
+    boardColumn.appendChild(formSection);
+    threadSection.appendChild(boardColumn);
+  }
+  boardColumn.appendChild(formSection);
+  threadSection.appendChild(boardColumn);
 };

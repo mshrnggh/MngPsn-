@@ -5,13 +5,15 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Node.js and MongoDB</title>
-  </head>
+    <link rel="stylesheet" href="../style/board.css">
+   </head>
+  
   <body>
     <div class="board-section">
       <h2>Bulletine Board Application with Local Server and MongoDB</h2>
       <div class="board-container">
         <div class="search-section">
-          <textarea id="search-input" placeholder="Search with key words between space ..." name="search-input"></textarea>
+          <textarea id="search-input" placeholder="  Search with keywords separated by spaces ..." name="search-input" required ></textarea> 
           <button id="search-button">SEARCH</button>
         </div>
         <!-- ↓この中に挿入していく -->
@@ -27,12 +29,19 @@
           <br />
           <button id="submitLocal" type="submit">Send to Local DB</button>
           <button id="submitMongoDB" type="submit">Send to Mongo DB</button>
+          <button id="modify" type="submit">Modify</button>
           <script type="module" src="post.mjs"></script>
           <script type="module" src="olorwm.mjs"></script>
           <script type="module" src="get.mjs"></script>
+          <script type="module" src="patch.mjs"></script>
+          <script type="module" src="search.mjs"></script>
         </form>
+        <div class="functional-section">
+          <div class="delete-section">Delete area</div>
+          <div class="strage-exchange">Temporary strage exchange</div>
+        </div>
       </div>
     </div>
-      <link rel="stylesheet" href="../style/board.css">
   </body>
+
 </html>
