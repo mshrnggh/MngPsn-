@@ -1,4 +1,4 @@
-const {getConfToMJS,registLocal,registMongo}=require('./postIPC.cjs');
+const {registLocal,registMongo}=require('./postIPC.cjs');
 const {getAllThreadsIPC}=require('../mainProcess/getIPC.cjs');
 const {getResearchIPC}=require('../mainProcess/searchIPC.cjs');
 const {ipcMain}=require("electron");const fs=require("fs");const path=require("path");
@@ -38,6 +38,7 @@ async function useMongoDB(mongodbUriValue,res){
   });});});}
 }
 function nouseMngdb(){ipcMain.on('nouseMongodb',(event)=>{event.reply('今回はMongoDBを使いません。')});}
+
 async function createBoard(ol,wm) {
   const {BrowserWindow,app}=require("electron");let Thread='';
   await import('../mngSchema.mjs').then(module=>{Thread=module.Thread;});
@@ -57,8 +58,40 @@ async function createBoard(ol,wm) {
    boardWindow.loadURL(url.format({pathname: path.join(__dirname, '../render/index.html'),
      protocol:'file:',slashes: true
    }));
-  await getConfToMJS(ol,wm); await getAllThreadsIPC(ol,wm);
-  
+   
+   if (ipcMain.eventNames().includes('get-DBdata') && ipcMain.listenerCount('get-DBdata') >= 1) {
+     ipcMain.removeAllListeners('get-DBdata');
+     ipcMain.on('get-DBdata', async (event) => { 
+       console.log('get-DBdata2 is called, ol, wm ', ol, wm);
+       const allThreads = await getAllThreadsIPC(ol, wm);
+       const serializedData = JSON.parse(JSON.stringify(allThreads));
+       event.reply('get-DBdata', serializedData, ol, wm);
+      }); 
+  } else { ipcMain.on('get-DBdata', async (event) => {
+      console.log('get-DBdata1 is called, ol, wm ', ol, wm);
+      const allThreads = await getAllThreadsIPC(ol, wm);
+      const serializedData = JSON.parse(JSON.stringify(allThreads));
+      event.reply('get-DBdata', serializedData, ol, wm);});
+  };
+
+  if (ipcMain.eventNames().includes('get-AllThreads') && ipcMain.listenerCount('get-AllThreads') >= 1) {
+    ipcMain.removeAllListeners('get-AllThreads');
+    ipcMain.removeAllListeners('get-AllThreads-reply');
+    ipcMain.on('get-AllThreads', async (event, ol, wm ) => { 
+      console.log('get-AllThreads2 is called, ol, wm ', ol, wm);
+      const allThreads = await getAllThreadsIPC(ol, wm);
+      console.log('allThreads at get-AllThreads2, cjs ', allThreads);
+      const serializedData = JSON.parse(JSON.stringify(allThreads));
+      event.reply('get-AllThreads-reply', serializedData);
+    });
+  } else { ipcMain.on('get-AllThreads', async (event, ol, wm) => {
+      console.log('get-AllThreads1 is called, ol, wm ', ol, wm);
+      const allThreads = await getAllThreadsIPC(ol, wm);
+      console.log('allThreads at get-AllThreads1, cjs ', allThreads);
+      const serializedData = JSON.parse(JSON.stringify(allThreads));
+      event.reply('get-AllTHreads-reply', serializedData);});
+  };
+
   if (ipcMain.eventNames().includes('add-to-localdb') && ipcMain.listenerCount('add-to-localdb') >= 1) {
     ipcMain.removeAllListeners('add-to-localdb');
     ipcMain.removeAllListeners('add-to-localdb-reply');
@@ -78,18 +111,13 @@ async function createBoard(ol,wm) {
     ipcMain.removeAllListeners('add-to-mongodb');
     ipcMain.removeAllListeners('add-to-mongodb-reply');
     ipcMain.on('add-to-mongodb', async (event, data) => { 
-      console.log('data1 at add-to-mongodb is called at server.cjs ',data);
       const newData=await registMongo(ol,wm,event,data);
-      console.log('newData1 at server.cjs ',newData);
       const serializedData=JSON.parse(JSON.stringify(newData));
-      console.log('serializedData1 at server.cjs ', serializedData);
       event.reply('add-to-mongodb-reply', serializedData);});
   } else {
     ipcMain.on('add-to-mongodb', async (event, data) => { 
-      console.log('data2 at add-to-mongodb is called at server.cjs ', data);
       const newData = await registMongo(ol, wm, event, data);
       const serializedData = JSON.parse(JSON.stringify(newData));
-      console.log('serializedData2 at server.cjs ', serializedData);
       event.reply('add-to-mongodb-reply', serializedData);});
   };
     
@@ -106,7 +134,6 @@ async function createBoard(ol,wm) {
       const newData = await getResearchIPC(ol, wm, keywords);
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('get-Research-reply', serializedData);});
-  }; 
-  
+  };   
 };
 module.exports = {startServer, getBoardWindow: () => boardWindow};

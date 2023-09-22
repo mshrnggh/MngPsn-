@@ -3,6 +3,7 @@ let ol = false; let wm = false;
 document.addEventListener('DOMContentLoaded', async () => {
   await window.postAPI.send('get-DBdata');
   await window.postAPI.receive('get-DBdata', async (data) => {
+    console.log('data at olorwm, mjs ', data);
     ol = data.ol; wm = data.wm;
     if (ol === true) {await removeMongoButton();await addMongoButton('UseMongo');} 
     const useMongo = document.getElementById('to_mongoConfig');

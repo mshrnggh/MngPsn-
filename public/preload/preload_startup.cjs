@@ -3,7 +3,6 @@ contextBridge.exposeInMainWorld('startUpAPI', {
   sendConfig: (configData) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.removeAllListeners('startup-config-data');
-      console.log('configData just before sending strtupconfdata event ', configData);
       ipcRenderer.send('startup-config-data', configData)
       .then(() => {console.log('Config data sent successfully');resolve();})
       .catch((err) => {console.error('Error sending config data:', err);reject(err);});

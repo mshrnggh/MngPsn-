@@ -1,10 +1,8 @@
-const {ipcMain}=require('electron');const path=require('path');const fs=require('fs');
+const path=require('path');const fs=require('fs');
 let Thread;
 import('../mngSchema.mjs').then((module) => { Thread = module.Thread; });
-let ol = false; let wm = false;
-async function getConfToMJS(ol, wm){return new Promise((resolve, reject)=>{
-  ipcMain.removeAllListeners('get-DBdata');ipcMain.on('get-DBdata',async(event)=>{
-    const data={ol,wm};event.reply('get-DBdata',data);resolve();});});}
+//let ol = false; let wm = false;
+
 async function registLocal(ol, wm, event, data) {
   const filePath = path.join(__dirname, '../localData.json');
   const existinLclDB = await fs.promises.readFile(filePath, 'utf-8');
@@ -50,7 +48,7 @@ async function postReloadIPC(ol, wm, event){
        }catch(err){console.error(err);resolve([]);} 
      }); } catch (error) { console.error(error); reject(error); }
 });};
-module.exports = {getConfToMJS, registLocal, registMongo};
+module.exports = {registLocal, registMongo};
 
 
 

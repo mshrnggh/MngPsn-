@@ -36,7 +36,7 @@ async function showResearchedList(ol,wm){
         // boardColumn.appendChild(boardList[i]);NodeListを入れ替えたので、この行は不要で不可。
     };
       //threadSection.appendChild(boardColumn);NodeListを入れ替えたので、この行は不要で不可。
-      console.log('boaC,threS finally at showResearchList() ', boardColumn,threadSection);
+      console.log('boaC,boaL,threS finally at showResearchList() ', boardColumn,boardList,threadSection);
     });};
     
     

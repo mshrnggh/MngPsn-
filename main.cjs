@@ -18,7 +18,7 @@ app.disableHardwareAcceleration(); //hardware acceleration無効化before app is
 app.whenReady().then(() => {startUp();});
 ipcMain.removeAllListeners('startup-config-data');
 ipcMain.on('startup-config-data', async (event, data) => {
-  console.log('data received at startup-config-data in maincjs', data);
+  console.log('startup-config-data event maincjs with data ', data);
   const a = data.mongodbUriValue||'';
   const b = data.wm;
   const c = data.ol;

@@ -1,5 +1,4 @@
-const {ipcMain}=require('electron');const path=require('path');const fs=require('fs');
-
+const fs=require("fs");const path=require("path");
 async function getResearchIPC(ol, wm, keywords) {return new Promise((resolve,reject)=>{
     try{ 
     import('../mngSchema.mjs').then(async(module) => {
@@ -28,7 +27,7 @@ async function getResearchIPC(ol, wm, keywords) {return new Promise((resolve,rej
             const regex = new RegExp(keyword, 'i');
             return regex.test(title) || regex.test(content);
           });
-        });
+        }); 
 
         // スレッドデータ取得
         allThreads = filteredData.map((thread) => {

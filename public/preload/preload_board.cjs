@@ -22,32 +22,28 @@ contextBridge.exposeInMainWorld('postAPI', {
     const newAllThre = await newDataPromise || Promise.resolve(); 
     return await newAllThre;
   },
+  removeChannel: async (channel) => {
+    await ipcRenderer.removeAllListeners(channel);  
+    console.log(`${channel} is removed`);
+  },
   send: async (channel, data) => {
     await ipcRenderer.removeAllListeners(channel);
     await ipcRenderer.send(channel, data);
     console.log(`${channel} is sent with data`, data);
   }, 
   receive: async (channel, func) => { await ipcRenderer.removeAllListeners(channel);
-    ipcRenderer.once(channel, async (event, ...args) => {
+    await ipcRenderer.on(channel, async (event, ...args) => {
       console.log(`${channel} is on with args`, args); await func(...args);
     });
   }
 });
 contextBridge.exposeInMainWorld('getAPI', {
-  AllThreadsAPI: async () => {
-    await ipcRenderer.removeAllListeners('get-AllThreads');
-    await ipcRenderer.send('get-AllThreads');
-    const data = await new Promise ((resolve, reject) => {
-      ipcRenderer.once('get-AllThreads', (event, ...args) => { 
-      resolve(args);
-      });}); return await data;
-  },
   getResearchAPI: async (ol,wm,keywords) => {
     await ipcRenderer.removeAllListeners('get-Research');
     await ipcRenderer.removeAllListeners('get-Research-reply');
     await ipcRenderer.send('get-Research', ol, wm, keywords);
     const data = await new Promise ((resolve, reject) => {
-      ipcRenderer.once('get-Research-reply', (event, ...args) => { 
+      ipcRenderer.on('get-Research-reply', (event, ...args) => { 
       resolve(args);
     });}); return await data;
   }, 	
