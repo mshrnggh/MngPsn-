@@ -34,49 +34,48 @@ async function showReloadList(newAllThre) {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata'); 
   await window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args; 
-    const boardList = document.querySelectorAll('.board-list');
-    boardList.forEach((list)=>{
-    while(list.firstChild){list.removeChild(list.firstChild);};});
-  const allReloadThre=await createReloadList(newAllThre);
-  console.log('allReloadThre at showReloadList, mjs ', allReloadThre)
-  await createReloadColumns(allReloadThre);});
+    console.log('typeof1 data, newAllThre ', typeof data, typeof newAllThre);
+    if (typeof data === "json") {data = JSON.parse(data);}
+    else {data = JSON.parse(JSON.stringify(data));}
+    const allReloadThre = await createReloadList(newAllThre);
+    const allReloadData = allReloadThre instanceof NodeList?allReloadThre:allReloadThre.querySelectorAll('.singleThread');
+    await createReloadColumns(allReloadData);});
 };
 async function createReloadList(data) { 
   const allThreadsarr=Array.isArray(data)&&Array.isArray(data[0])?data.flat():Array.isArray(data)?data:[data];
-  let boardList;
+  const boardList = document.querySelectorAll('.board-list');
+  boardList.forEach((boardList)=>{boardList.innerHTML='';});
   for (let i=0;i<allThreadsarr.length;i++) {
-    boardList = document.querySelectorAll('.board-list');
-    const boardItem=document.createElement('div');boardItem.classList.add('singleThread');
+    const boardItem = document.createElement('div');boardItem.classList.add('singleThread');
     const thread=allThreadsarr[i];let title=thread.title;
     const titleRegex=/^(?:[\x00-\x7F]|[\uFF61-\uFF9F]{2}){0,18}(?:(?![\x00-\x7F]|[\uFF61-\uFF9F]{2}).|$)/;
     if(titleRegex.test(title)){if(countLength(title)>50) {title=sliceString(title,50)+'...';}
     }else{if(countLength(title)>50){title=sliceString(title,50)+'...';}}
-    boardItem.textContent = title;boardList[i%2].appendChild(boardItem);
-  } const boardListDOM = document.querySelectorAll('.singleThread');return boardListDOM;
+    boardItem.dataset.title=title;boardItem.dataset.id=thread.id;// datasetにidプロパティ追加
+    boardItem.dataset.content=thread.content;boardItem.dataset.straged=thread.straged;
+    boardItem.textContent=title;//DOM要素valueをtitleプロパティに設定
+    boardList[i%2].appendChild(boardItem);
+  }; const boardListDOM = document.querySelectorAll('.singleThread');return boardListDOM;
   function countLength(str){let len=0;for(let i=0;i<str.length;i++){const code=str.charCodeAt(i);
     if(code>=0x00&&code<=0x7f){len+=1;}else{len+=2;}} return len;};
   function sliceString(str,len){let count=0;let result='';for(let i=0;i<str.length;i++)
     {const code=str.charCodeAt(i);if(code>=0x00&&code<=0x7f){count+=1;}else{count+=2;}
       if(count>len){break;} result+=str.charAt(i);}return result;};
 };
-async function createReloadColumns(reloadData){let allThreads;
-  if(reloadData instanceof NodeList){allThreads=reloadData;}
-  else if(Array.isArray(reloadData)){allThreads=reloadData.flat();}
-  else if(typeof reloadData==='object'){allThreads=[reloadData];}
-  else{console.error('reloadData is not an object');return;};
+async function createReloadColumns(allReloadData){
   const boardList=document.querySelectorAll('.board-list');
-  const boardColumn=document.querySelector('.board-column');
   const columnCount = 2; const maxRows = 14;
-  const rowCount=Math.ceil(Math.min(allThreads.length,columnCount*maxRows)/columnCount);
-  for (let i=0;i<columnCount;i++){boardList[i].innerHTML='';
+  const rowCount=Math.ceil(Math.min(allReloadData.length,columnCount*maxRows)/columnCount);
+  for (let i=0;i<columnCount;i++){
     const boardColumn=document.querySelector('.board-column');
-    for (let j=i*rowCount;j<Math.min((i+1)*rowCount,allThreads.length);j++){
-      if(!boardList[i].contains(allThreads[j])){boardList[i].appendChild(allThreads[j]);}
+    for (let j=i*rowCount;j<Math.min((i+1)*rowCount,allReloadData.length);j++){
+      if(!boardList[i].contains(allReloadData[j])){boardList[i].appendChild(allReloadData[j]);}
       if(boardList[i].children.length>=maxRows){break;};};
     boardColumn.appendChild(boardList[i]);
   };
   const threadSection = document.querySelector('.thread-section');
   const formSection = document.querySelector('.form-section');
+  const boardColumn=document.querySelector('.board-column');
   boardColumn.appendChild(formSection);
   threadSection.appendChild(boardColumn);
 };

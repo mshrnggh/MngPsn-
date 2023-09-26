@@ -1,6 +1,7 @@
 const {registLocal,registMongo}=require('./postIPC.cjs');
-const {getAllThreadsIPC}=require('../mainProcess/getIPC.cjs');
-const {getResearchIPC}=require('../mainProcess/searchIPC.cjs');
+const {getAllThreadsIPC}=require('./getIPC.cjs');
+const {getResearchIPC}=require('./searchIPC.cjs');
+const {updateDataIPC}=require('./patchIPC.cjs');
 const {ipcMain}=require("electron");const fs=require("fs");const path=require("path");
 const url=require('url');const dotenv=require("dotenv");dotenv.config();
 const express=require("express");const appExpr=express();appExpr.use(express.json());
@@ -61,14 +62,14 @@ async function createBoard(ol,wm) {
    
    if (ipcMain.eventNames().includes('get-DBdata') && ipcMain.listenerCount('get-DBdata') >= 1) {
      ipcMain.removeAllListeners('get-DBdata');
-     ipcMain.on('get-DBdata', async (event) => { 
-       console.log('get-DBdata2 is called, ol, wm ', ol, wm);
-       const allThreads = await getAllThreadsIPC(ol, wm);
-       const serializedData = JSON.parse(JSON.stringify(allThreads));
-       event.reply('get-DBdata', serializedData, ol, wm);
+     ipcMain.on('get-DBdata', async (event,...args) => { console.log('get-DBdata2 ipcMain servercjs, args ', args );
+       let allThreads = await getAllThreadsIPC(ol, wm);
+       if (allThreads.isjson === true) {allThreads = JSON.parse((allThreads));}
+       else if (allThreads.isjson === false) {allThreads = JSON.parse(JSON.stringify(allThreads));}
+        event.reply('get-DBdata', allThreads, ol, wm);
       }); 
-  } else { ipcMain.on('get-DBdata', async (event) => {
-      console.log('get-DBdata1 is called, ol, wm ', ol, wm);
+  } else { ipcMain.on('get-DBdata', async (event,...args) => {
+      console.log('get-DBdata1 ipcMainon servercjs args,ol,wm ',args, ol, wm);
       const allThreads = await getAllThreadsIPC(ol, wm);
       const serializedData = JSON.parse(JSON.stringify(allThreads));
       event.reply('get-DBdata', serializedData, ol, wm);});
@@ -85,11 +86,10 @@ async function createBoard(ol,wm) {
       event.reply('get-AllThreads-reply', serializedData);
     });
   } else { ipcMain.on('get-AllThreads', async (event, ol, wm) => {
-      console.log('get-AllThreads1 is called, ol, wm ', ol, wm);
       const allThreads = await getAllThreadsIPC(ol, wm);
       console.log('allThreads at get-AllThreads1, cjs ', allThreads);
       const serializedData = JSON.parse(JSON.stringify(allThreads));
-      event.reply('get-AllTHreads-reply', serializedData);});
+      event.reply('get-AllThreads-reply', serializedData);});
   };
 
   if (ipcMain.eventNames().includes('add-to-localdb') && ipcMain.listenerCount('add-to-localdb') >= 1) {
@@ -123,7 +123,7 @@ async function createBoard(ol,wm) {
     
   if (ipcMain.eventNames().includes('get-Research') && ipcMain.listenerCount('get-Research') >= 1) {
     ipcMain.removeAllListeners('get-Research');
-    ipcMain.removeAllListeners('get-Research');
+    ipcMain.removeAllListeners('get-Research-reply');
     ipcMain.on('get-Research', async (event, ol, wm, keywords) => { 
       const newData = await getResearchIPC(ol, wm, keywords); 
       const serializedData = JSON.parse(JSON.stringify(newData));
@@ -134,6 +134,25 @@ async function createBoard(ol,wm) {
       const newData = await getResearchIPC(ol, wm, keywords);
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('get-Research-reply', serializedData);});
+  };   
+  
+  if (ipcMain.eventNames().includes('update-DBdata') && ipcMain.listenerCount('update-DBdata') >= 1) {
+    ipcMain.removeAllListeners('update-DBdata');
+    ipcMain.removeAllListeners('update-DBdata-reply');
+    ipcMain.on('update-DBdata', async (event, ...args) => {
+      const renewData = args[0]; ol = args[1];wm= args[2];
+      console.log('data2 at update-DBdata servercjs ', ol,wm); 
+      const renewAllData = await updateDataIPC(renewData,ol,wm); 
+      const serializedData = JSON.parse(JSON.stringify(renewAllData));
+      console.log('serializedData2 servercjs ', serializedData);
+      event.reply('update-DBdata-reply', serializedData);
+    });
+  } else {
+    ipcMain.on('update-DBdata', async (event, ...args) => {
+      const renewData = args[0]; ol = args[1];wm= args[2];
+      const renewAllData = await updateDataIPC(renewData,ol,wm);
+      const serializedData = JSON.parse(JSON.stringify(renewAllData));
+      event.reply('update-DBdata-reply', serializedData);});
   };   
 };
 module.exports = {startServer, getBoardWindow: () => boardWindow};

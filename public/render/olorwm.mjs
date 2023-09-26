@@ -1,18 +1,25 @@
 // @ts-nocheck
-let ol = false; let wm = false;
+import { createBoardList, createBoardColumns } from "./get.mjs";
+
+let ol = false; let wm = false;let data=[];
 document.addEventListener('DOMContentLoaded', async () => {
+  await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata');
-  await window.postAPI.receive('get-DBdata', async (data) => {
-    console.log('data at olorwm, mjs ', data);
-    ol = data.ol; wm = data.wm;
+  await window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args;
+    console.log('get-DBdata is called, args ', args );
     if (ol === true) {await removeMongoButton();await addMongoButton('UseMongo');} 
     const useMongo = document.getElementById('to_mongoConfig');
     if (useMongo!==null){
         await useMongo.addEventListener('click', async () => {
-          await window.postAPI.send('useMongoDB');}); 
-    }
-  });
+          await window.postAPI.send('useMongoDB');}); console.log('useMongo event sent');
+    };
+    if (typeof data === "json") {data = JSON.parse(data);}
+    else {data = JSON.parse(JSON.stringify(data));};console.log('data olorwm before createList', data);
+    const allThreList = await createBoardList(data);
+    const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
+    await createBoardColumns(allThreads);});
 });
+
 async function removeMongoButton() {
   const mongoButton = document.querySelector('#submitMongoDB');
   if (mongoButton) {await mongoButton.remove();

@@ -26,10 +26,10 @@ contextBridge.exposeInMainWorld('postAPI', {
     await ipcRenderer.removeAllListeners(channel);  
     console.log(`${channel} is removed`);
   },
-  send: async (channel, data) => {
+  send: async (channel, ...args) => {
     await ipcRenderer.removeAllListeners(channel);
-    await ipcRenderer.send(channel, data);
-    console.log(`${channel} is sent with data`, data);
+    await ipcRenderer.send(channel, ...args);
+    console.log(`${channel} is sent with data`, args);
   }, 
   receive: async (channel, func) => { await ipcRenderer.removeAllListeners(channel);
     await ipcRenderer.on(channel, async (event, ...args) => {
