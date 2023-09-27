@@ -1,4 +1,5 @@
 let ol = false; let wm = false; let data = []; 
+import { dragStart, dragEnd } from "./delchang.mjs";
 const getAllThreAgain = document.querySelector('#getAllThreAgain');
 getAllThreAgain.addEventListener('click',async()=>{await showBoardList()});
 
@@ -20,12 +21,20 @@ export function createBoardList(data) {
   if(!data) return null;
   for (let i = 0; i < allThreadsarr.length; i++) {
     const singleItem = document.createElement('div');singleItem.classList.add('singleThread');
+    singleItem.setAttribute('draggable', 'true');
     const thread = allThreadsarr[i];let title = thread.title;
     const titleRegex = /^(?:[\x00-\x7F]|[\uFF61-\uFF9F]{2}){0,18}(?:(?![\x00-\x7F]|[\uFF61-\uFF9F]{2}).|$)/;
-    if(titleRegex.test(title)){if(countLength(title)>50){title=sliceString(title,50)+'...';};
-    }else{if(countLength(title)>50){title=sliceString(title,50)+'...';};};
+    if(titleRegex.test(title)){if(countLength(title)>48){title=sliceString(title,48)+'...';};
+    }else{if(countLength(title)>48){title=sliceString(title,48)+'...';};};
     singleItem.dataset.title=title;singleItem.dataset.id = thread.id;singleItem.dataset.straged=thread.straged;
-    singleItem.dataset.content=thread.content;singleItem.textContent=title;
+    singleItem.dataset.content=thread.content;
+    const threadTitle = document.createElement('div');threadTitle.classList.add('thread-title');
+    const pingedDiv = document.createElement('span');
+    pingedDiv.classList.add('pinged');pingedDiv.innerHTML = '&nbsp;';
+    threadTitle.appendChild(pingedDiv);const titleText = document.createTextNode(title.trim());
+    threadTitle.appendChild(titleText);singleItem.appendChild(threadTitle);
+    singleItem.addEventListener('dragstart', dragStart);
+    singleItem.addEventListener('dragend', dragEnd);
     boardList[i%2].appendChild(singleItem);//特定のboardListにデータをappendChildで蓄積
   }; const singleDOM = document.querySelectorAll('.singleThread');return singleDOM;  
   //上のfor文外で、DOMをquerySelectorAllで取得するとNodeList形式データになり、それをreturn
@@ -37,7 +46,7 @@ export function createBoardList(data) {
 };
 
 export async function createBoardColumns(allThreads) {
-  const columnCount = 2; const maxRows = 14;
+  const columnCount = 2; const maxRows = 15;
   const boardList = document.querySelectorAll('.board-list');
   for (let i=0;i<columnCount;i++){const boardColumn = document.querySelector('.board-column');
     const rowCount= await Math.ceil(Math.min(allThreads.length,columnCount*maxRows)/columnCount);
@@ -49,4 +58,5 @@ export async function createBoardColumns(allThreads) {
   const boardColumn = document.querySelector('.board-column'); 
   const formSection = document.querySelector('.form-section');
   boardColumn.appendChild(formSection);threadSection.appendChild(boardColumn);   
+  console.log('threadSection final', threadSection);
 };

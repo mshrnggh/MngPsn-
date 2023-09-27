@@ -12,9 +12,7 @@ async function getAllThreadsIPC(ol, wm) {return new Promise((resolve,reject)=>  
         const mongoDataCount = await Thread.countDocuments();
         const mongoDataLimit = Math.min(mongoDataCount, 28);
         mongoData.splice(mongoDataLimit); 
-        //const localDataLimit = Math.min(28 - mongoDataLimit, localData.length);
-        data = [...mongoData, ...data];
-        data = data.slice(0, 28);
+        data = [...mongoData, ...data]; data = data.slice(0, 28);
         allThreads = data.map((thread) => {
             const id = thread.id || thread._id && thread._id.toString();
             const title = thread.title || thread['title:'] || '';

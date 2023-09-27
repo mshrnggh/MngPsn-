@@ -1,5 +1,6 @@
 window.flipNotepad = flipNotepad;
 let ol = false; let wm = false; let data = []; 
+import { dragStart, dragEnd } from "./delchang.mjs";
 document.addEventListener('DOMContentLoaded', () => {
   const formSection = document.querySelector('.form-section');
   formSection.addEventListener('submit', async (event)=>{event.preventDefault();
@@ -44,16 +45,22 @@ async function showReloadList(newAllThre) {
 async function createReloadList(data) { 
   const allThreadsarr=Array.isArray(data)&&Array.isArray(data[0])?data.flat():Array.isArray(data)?data:[data];
   const boardList = document.querySelectorAll('.board-list');
-  boardList.forEach((boardList)=>{boardList.innerHTML='';});
+  boardList.forEach((boardList)=>{boardList.innerHTML='';});if(!data) return null;
   for (let i=0;i<allThreadsarr.length;i++) {
     const boardItem = document.createElement('div');boardItem.classList.add('singleThread');
-    const thread=allThreadsarr[i];let title=thread.title;
+    boardItem.setAttribute('draggable', 'true');const thread=allThreadsarr[i];let title=thread.title;
     const titleRegex=/^(?:[\x00-\x7F]|[\uFF61-\uFF9F]{2}){0,18}(?:(?![\x00-\x7F]|[\uFF61-\uFF9F]{2}).|$)/;
-    if(titleRegex.test(title)){if(countLength(title)>50) {title=sliceString(title,50)+'...';}
-    }else{if(countLength(title)>50){title=sliceString(title,50)+'...';}}
+    if(titleRegex.test(title)){if(countLength(title)>48) {title=sliceString(title,48)+'...';}
+    }else{if(countLength(title)>48){title=sliceString(title,48)+'...';}}
     boardItem.dataset.title=title;boardItem.dataset.id=thread.id;// datasetにidプロパティ追加
     boardItem.dataset.content=thread.content;boardItem.dataset.straged=thread.straged;
-    boardItem.textContent=title;//DOM要素valueをtitleプロパティに設定
+    const threadTitle = document.createElement('div');threadTitle.classList.add('thread-title');
+    const pingedDiv = document.createElement('span');
+    pingedDiv.classList.add('pinged');pingedDiv.innerHTML = '&nbsp;';
+    threadTitle.appendChild(pingedDiv);const titleText = document.createTextNode(title);
+    threadTitle.appendChild(titleText);boardItem.appendChild(threadTitle);
+    boardItem.addEventListener('dragstart', dragStart);
+    boardItem.addEventListener('dragend', dragEnd);
     boardList[i%2].appendChild(boardItem);
   }; const boardListDOM = document.querySelectorAll('.singleThread');return boardListDOM;
   function countLength(str){let len=0;for(let i=0;i<str.length;i++){const code=str.charCodeAt(i);
@@ -64,7 +71,7 @@ async function createReloadList(data) {
 };
 async function createReloadColumns(allReloadData){
   const boardList=document.querySelectorAll('.board-list');
-  const columnCount = 2; const maxRows = 14;
+  const columnCount = 2; const maxRows = 15;
   const rowCount=Math.ceil(Math.min(allReloadData.length,columnCount*maxRows)/columnCount);
   for (let i=0;i<columnCount;i++){
     const boardColumn=document.querySelector('.board-column');

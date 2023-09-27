@@ -69,7 +69,6 @@ async function createBoard(ol,wm) {
         event.reply('get-DBdata', allThreads, ol, wm);
       }); 
   } else { ipcMain.on('get-DBdata', async (event,...args) => {
-      console.log('get-DBdata1 ipcMainon servercjs args,ol,wm ',args, ol, wm);
       const allThreads = await getAllThreadsIPC(ol, wm);
       const serializedData = JSON.parse(JSON.stringify(allThreads));
       event.reply('get-DBdata', serializedData, ol, wm);});

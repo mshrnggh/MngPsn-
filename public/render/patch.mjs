@@ -2,15 +2,16 @@ import { createBoardList, createBoardColumns } from "./get.mjs";
 
 document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', event => {
-    console.log('event.target ', event.target); 
-    if (event.target.matches('.singleThread')) {
+    const thisSingThre = event.target.closest('.singleThread'); 
+    if (thisSingThre) {
+      console.log('event.target, thisSingThre.querySelector(".thread-title") ', event.target, thisSingThre.querySelector(".thread-title")); 
       const singleThreads = document.querySelectorAll('.singleThread');
       singleThreads.forEach(singleThread => {
-        if (singleThread === event.target) {
+        if (thisSingThre === singleThread) {
           if (singleThread.classList.contains('locked')) {
             singleThread.classList.remove('locked'); clearDisplay();
           } else { singleThreads.forEach(otherSingleThread => {
-            if (otherSingleThread !== singleThread) {
+            if (otherSingleThread !== thisSingThre) {
               otherSingleThread.classList.remove('locked'); clearDisplay();
           }});
           if(!singleThread.classList.contains('locked')){
@@ -55,12 +56,11 @@ function displayContent(singleThread) {
   console.log('dipslayContent is called!');
   console.log('singleThread ', singleThread);
   if (!singleThread) return;
-  const title = singleThread.dataset.title;
+  const title = singleThread.querySelector('.thread-title').textContent;
   const content = singleThread.dataset.content;
   const inputTitle = document.querySelector('#inputTitle');
   const inputContent = document.querySelector('#inputContent');
-  inputTitle.value = title;
-  inputContent.value = content;
+  inputTitle.value = title;  inputContent.value = content;
 };
 
 function clearDisplay() {
