@@ -6,15 +6,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata');
   await window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args;
-    console.log('get-DBdata is called, args ', args );
     if (ol === true) {await removeMongoButton();await addMongoButton('UseMongo');} 
     const useMongo = document.getElementById('to_mongoConfig');
     if (useMongo!==null){
         await useMongo.addEventListener('click', async () => {
-          await window.postAPI.send('useMongoDB');}); console.log('useMongo event sent');
+          await window.postAPI.send('useMongoDB');}); 
     };
     if (typeof data === "json") {data = JSON.parse(data);}
-    else {data = JSON.parse(JSON.stringify(data));};console.log('data olorwm before createList', data);
+    else {data = JSON.parse(JSON.stringify(data));};
     const allThreList = await createBoardList(data);
     const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
     await createBoardColumns(allThreads);});

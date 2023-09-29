@@ -1,5 +1,5 @@
 let ol = false; let wm = false; let data = []; 
-import { dragStart, dragEnd } from "./delchang.mjs";
+import { dragStart, dragEnd, dragOver, dragLeave, drop } from "./delchang.mjs";
 const getAllThreAgain = document.querySelector('#getAllThreAgain');
 getAllThreAgain.addEventListener('click',async()=>{await showBoardList()});
 
@@ -33,8 +33,7 @@ export function createBoardList(data) {
     pingedDiv.classList.add('pinged');pingedDiv.innerHTML = '&nbsp;';
     threadTitle.appendChild(pingedDiv);const titleText = document.createTextNode(title.trim());
     threadTitle.appendChild(titleText);singleItem.appendChild(threadTitle);
-    singleItem.addEventListener('dragstart', dragStart);
-    singleItem.addEventListener('dragend', dragEnd);
+    singleItem.addEventListener('dragstart',dragStart);singleItem.addEventListener('dragend', dragEnd);
     boardList[i%2].appendChild(singleItem);//特定のboardListにデータをappendChildで蓄積
   }; const singleDOM = document.querySelectorAll('.singleThread');return singleDOM;  
   //上のfor文外で、DOMをquerySelectorAllで取得するとNodeList形式データになり、それをreturn

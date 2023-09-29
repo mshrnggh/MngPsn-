@@ -1,33 +1,45 @@
 window.flipNotepad = flipNotepad;
 let ol = false; let wm = false; let data = []; 
-import { dragStart, dragEnd } from "./delchang.mjs";
+import { dragStart, dragEnd} from "./delchang.mjs";
 document.addEventListener('DOMContentLoaded', () => {
   const formSection = document.querySelector('.form-section');
-  formSection.addEventListener('submit', async (event)=>{event.preventDefault();
-    const submitterId=event.submitter.id;await flipNotepad(event,submitterId,formSection);});
+  console.log('formSection1',formSection);
+  formSection.addEventListener('submit', async (event)=>{
+    event.preventDefault(); const submitterId=event.submitter.id;
+    //const formSection = document.querySelector('.form-section');
+    console.log('formSection2',formSection);
+    await flipNotepad(event,submitterId,formSection);});
 });
-async function flipNotepad(event, submittedId,formSection) {
-  if(!event||event.submitter.nodeName!=='BUTTON') { return;}
-  else{if(!formSection){formSection=document.querySelector('.form-section');
-      if(!formSection){console.error('formSection not found');return;};};
-  async function flipAnination (event) {
+async function flipNotepad(event,submitterId,formSection) {
+  if(!event||event.submitter.nodeName!=='BUTTON') {return;}
+  if(!formSection){console.error('formSection not found');return;};
+  await flipAnination(event,formSection);
+  async function flipAnination (event, formSection) {
     const formData = new FormData(formSection);
     const title=formData.get('inputTitle');const content=formData.get('inputContent');
     const note={title,content};formSection.classList.add('flip');
-    await new Promise(resolve => setTimeout(resolve, 355));
-    await addToDB(note, submittedId, formSection, event);
-    formSection.style.display = 'none'; formSection.classList.remove('flip');
+    console.log('in the middle of flipAnination, formSec',formSection)
+    await new Promise(resolve => setTimeout(resolve, 350));
+    await addToDB(note, submitterId, formSection, event);
+    formSection.classList.remove('flip');
+    // await new Promise(resolve => setTimeout(resolve, 0));
+    // formSection.style.display = 'none';
+    // await new Promise(resolve => setTimeout(resolve, 500));
+    // formSection.style.display = 'block';
+    await new Promise(resolve => setTimeout(resolve, 0));
+    formSection.classList.remove('show');
+    await new Promise(resolve => setTimeout(resolve, 500));
+    formSection.classList.add('show');
     const inputTitle = document.querySelector('#inputTitle');
     const inputContent = document.querySelector('#inputContent');
     inputTitle.value = ''; inputContent.value = '';
-    await new Promise(resolve => setTimeout(resolve, 0)); formSection.style.display = 'block';
-  };await flipAnination(event);
-  event.target.removeEventListener('submit', flipNotepad);
+    event.target.removeEventListener('submit', flipNotepad);
+    };
   //formSection.addEventListener('submit',flipNotepad);このコードがここに無くても、2行目のDomContentLoadedで再度イベントリスナーが登録される
-};};
-async function addToDB(note, submittedId) {let newAllThre;
-  if (submittedId==='submitLocal') {newAllThre=await window.postAPI.addToLocalDB(note)
-  } else if (submittedId==='submitMongoDB') {
+};
+async function addToDB(note, submitterId) {let newAllThre;
+  if (submitterId==='submitLocal') {newAllThre=await window.postAPI.addToLocalDB(note)
+  } else if (submitterId==='submitMongoDB') {
     newAllThre = await window.postAPI.addToMongoDB(note);
   }; await showReloadList(newAllThre);
 };
@@ -59,8 +71,7 @@ async function createReloadList(data) {
     pingedDiv.classList.add('pinged');pingedDiv.innerHTML = '&nbsp;';
     threadTitle.appendChild(pingedDiv);const titleText = document.createTextNode(title);
     threadTitle.appendChild(titleText);boardItem.appendChild(threadTitle);
-    boardItem.addEventListener('dragstart', dragStart);
-    boardItem.addEventListener('dragend', dragEnd);
+    boardItem.addEventListener('dragstart',dragStart);boardItem.addEventListener('dragend', dragEnd);
     boardList[i%2].appendChild(boardItem);
   }; const boardListDOM = document.querySelectorAll('.singleThread');return boardListDOM;
   function countLength(str){let len=0;for(let i=0;i<str.length;i++){const code=str.charCodeAt(i);

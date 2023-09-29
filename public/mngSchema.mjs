@@ -3,16 +3,16 @@ import mongoose from "mongoose";
 const threadSchema = new mongoose.Schema({
   title: {
     type: String,
-    required: true,
+    required: true
   },
   createdAt: { type: Date, default: Date.now },
   content: {
     type: String,
-    required: true,
+    required: true
   },
   straged: {
     type: String,
-    required: true,
+    required: true
   },
 });
 

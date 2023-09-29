@@ -2,6 +2,7 @@ const {registLocal,registMongo}=require('./postIPC.cjs');
 const {getAllThreadsIPC}=require('./getIPC.cjs');
 const {getResearchIPC}=require('./searchIPC.cjs');
 const {updateDataIPC}=require('./patchIPC.cjs');
+const {deleteDataIPC, exchangeDataIPC }=require('./delchanIPC.cjs');
 const {ipcMain}=require("electron");const fs=require("fs");const path=require("path");
 const url=require('url');const dotenv=require("dotenv");dotenv.config();
 const express=require("express");const appExpr=express();appExpr.use(express.json());
@@ -152,6 +153,45 @@ async function createBoard(ol,wm) {
       const renewAllData = await updateDataIPC(renewData,ol,wm);
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
       event.reply('update-DBdata-reply', serializedData);});
+  };   
+
+  if (ipcMain.eventNames().includes('delete-thread') && ipcMain.listenerCount('delete-thread') >= 1) {
+    ipcMain.removeAllListeners('delete-thread');
+    ipcMain.removeAllListeners('delete-thread-reply');
+    ipcMain.on('delete-thread', async (event, ...args) => {
+      const renewData = args[0]; ol = args[1];wm= args[2];
+      console.log('data2 at delete-thread servercjs ', ol,wm); 
+      const renewAllData = await deleteDataIPC(renewData,ol,wm); 
+      const serializedData = JSON.parse(JSON.stringify(renewAllData));
+      console.log('serializedData2 servercjs ', serializedData);
+      event.reply('delete-thread-reply', serializedData);
+    });
+  } else {
+    ipcMain.on('delete-thread', async (event, ...args) => {
+      const renewData = args[0]; ol = args[1];wm= args[2];
+      const renewAllData = await deleteDataIPC(renewData,ol,wm);
+      const serializedData = JSON.parse(JSON.stringify(renewAllData));
+      event.reply('delete-thread-reply', serializedData);});
+  };   
+  
+  if (ipcMain.eventNames().includes('thread-exchange') && ipcMain.listenerCount('thread-exchange') >= 1) {
+    ipcMain.removeAllListeners('thread-exchange');
+    ipcMain.removeAllListeners('thread-exchange-reply');
+    ipcMain.on('thread-exchange', async (event, ...args) => {
+      const renewData = args[0]; ol = args[1];wm= args[2];
+      console.log('data2 at thread-exchange servercjs ', ol,wm); 
+      const renewAllData = await deleteDataIPC(renewData,ol,wm); 
+      const serializedData = JSON.parse(JSON.stringify(renewAllData));
+      console.log('serializedData2 servercjs ', serializedData);
+      event.reply('thread-exchange-reply', serializedData);
+    });
+  } else {
+    ipcMain.on('thread-exchange', async (event, ...args) => {
+      const renewData = args[0]; ol = args[1];wm= args[2];
+      const renewAllData = await exchangeDataIPC(renewData,ol,wm);
+      //console.log('renewAllData1 at exchange servercjs ', renewAllData);
+      const serializedData = JSON.parse(JSON.stringify(renewAllData));
+      event.reply('thread-exchange-reply', serializedData);});
   };   
 };
 module.exports = {startServer, getBoardWindow: () => boardWindow};

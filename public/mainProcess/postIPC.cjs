@@ -1,7 +1,6 @@
 const path=require('path');const fs=require('fs');
 let Thread;
 import('../mngSchema.mjs').then((module) => { Thread = module.Thread; });
-//let ol = false; let wm = false;
 
 async function registLocal(ol, wm, event, data) {
   const filePath = path.join(__dirname, '../localData.json');

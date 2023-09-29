@@ -31,8 +31,7 @@ async function getAllThreadsIPC(ol, wm) {return new Promise((resolve,reject)=>  
          const content = thread.content || thread['content:']; 
          const straged = thread.straged || thread['straged:'];
          return {id,title,content,straged};
-       });
-       console.log('allThreads ol', allThreads); resolve(allThreads);
+       }); resolve(allThreads);
      })();
   } 
 } catch (error) {console.error(error);reject(error);}
