@@ -10,40 +10,32 @@ document.addEventListener('DOMContentLoaded', async()=>{
   await strageExchange.addEventListener('drop', drop); 
 });
 
- export async function dragStart(event) {
-   console.log('dragStart', this.className, this.dataset.title);
+ export async function dragStart(event) {   
    await event.dataTransfer.setData('text/plain', JSON.stringify({
      id:this.dataset.id, title:this.dataset.title, content:this.dataset.content, 
      straged:this.dataset.straged, value: this.value}));
    setTimeout(() => {this.className += ' ondrag';}, 0);
-   event.currentTarget.style.opacity = '1';
-   console.log('dragStart done', this.className);
+   event.currentTarget.style.opacity = '1';   
 }
 
 export async function dragEnd(event) {
-  console.log('dragEnd called', this.className);
   event.currentTarget.style.opacity = '1';
-  this.className = 'singleThread';
-  console.log('dragEnd done', this.className);
+  this.className = 'singleThread';  
 }
 
 export async function dragOver(event) {
-  console.log('dragOver called', this.className);
   event.preventDefault();
   await this.classList.add("hovered");
-  event.currentTarget.style.opacity = '0.5';
-  console.log('dragOver done', this.className);
+  event.currentTarget.style.opacity = '0.5';  
 }
 
 export async function dragLeave(event) {  
-  console.log('dragLeave called', this.className);
   await this.classList.remove("hovered");
   event.currentTarget.style.opacity = '1';
-  console.log('dragLeave done', this.className);
 }
 
 export async function drop(event) { 
-  await this.classList.remove("hovered");console.log('drop called in...', this.className);
+  await this.classList.remove("hovered");
   event.currentTarget.style.opacity = '1';let ol, wm;let data=[];
   if(event.currentTarget.className === 'delete-section') {
     const threadElement = event.dataTransfer.getData('text/plain');
@@ -58,8 +50,7 @@ export async function drop(event) {
       await window.postAPI.send('delete-thread', deleteData,ol,wm);
       await window.postAPI.removeChannel('delete-thread-reply');
       await window.postAPI.receive('delete-thread-reply',async(...args)=>{
-        const newAllData=args[0];
-        console.log('newAllData after delesion ', newAllData,ol,wm);console.log('typeof newAllData ', typeof newAllData);
+        const newAllData=args[0];        
         const allThreList = await createBoardList(newAllData);
         const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
         await createBoardColumns(allThreads);
@@ -81,7 +72,6 @@ export async function drop(event) {
        await window.postAPI.removeChannel('thread-exchange-reply');
        await window.postAPI.receive('thread-exchange-reply', async(...args)=>{
        const newAllData=args[0];
-       console.log('newAllData after exchange ', newAllData,ol,wm);console.log('typeof newAllData ', typeof newAllData);
        const allThreList = await createBoardList(newAllData);
        const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
        await createBoardColumns(allThreads);

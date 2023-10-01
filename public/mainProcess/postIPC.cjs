@@ -13,8 +13,8 @@ async function registLocal(ol, wm, event, data) {
 async function registMongo(ol, wm, event, data) {
   const existingData = await Thread.find({ title: data.title });
   if(existingData.length>0){console.log('Data already exists in MongoDB');return;};
-  const newMNGData = await new Thread({title:data.title,content:data.content,straged:data.straged,
-  });await newMNGData.save();const newAllThre = await postReloadIPC(ol, wm, event);
+  const newMNGData=await new Thread({title:data.title,content:data.content,straged:data.straged,});
+  await newMNGData.save();const newAllThre = await postReloadIPC(ol, wm, event);
   return newAllThre;
 };
 async function postReloadIPC(ol, wm, event){
@@ -36,7 +36,7 @@ async function postReloadIPC(ol, wm, event){
             //const localDataLimit = Math.min(28 - mongoDataLimit, localData.length);
             data = await [...data, ...localData.slice(0, 28)];
           }      
-          if(data) { console.log('data A', data); 
+          if(data) {  
             data = await data.filter((thread) => thread.id || thread._id).slice(0, 28);
             allThreads = await data.map((thread) => {
               const id = thread.id || thread._id.toString();
@@ -44,7 +44,7 @@ async function postReloadIPC(ol, wm, event){
               const content = thread.content || thread['content:'];
               const straged = thread.straged || thread['straged:'];
               return { id, title, content, straged };});
-          }; console.log('allThreads at last', allThreads);resolve(allThreads);
+          }; resolve(allThreads);
        }catch(err){console.error(err);resolve([]);} 
      }); } catch (error) { console.error(error); reject(error); }
 });};

@@ -10,7 +10,6 @@ const mongoose=require("mongoose");let boardWindow;
 let mongodbUriValue="";let wm=false;let ol=false;
 
 async function startServer(mongodbUriValue,wm,ol){ 
-  console.log('startServer is called, mngURI, wm, ol ',mongodbUriValue,wm,ol);
   if (wm===true){mongodbUriValue=mongodbUriValue||process.env.MONGO_URI;
     try{useMongoDB(mongodbUriValue);}catch(error){console.error(error);}
   }else if(ol===true){nouseMngdb();}await createBoard(ol,wm);
@@ -63,7 +62,7 @@ async function createBoard(ol,wm) {
    
    if (ipcMain.eventNames().includes('get-DBdata') && ipcMain.listenerCount('get-DBdata') >= 1) {
      ipcMain.removeAllListeners('get-DBdata');
-     ipcMain.on('get-DBdata', async (event,...args) => { console.log('get-DBdata2 ipcMain servercjs, args ', args );
+     ipcMain.on('get-DBdata', async (event,...args) => { 
        let allThreads = await getAllThreadsIPC(ol, wm);
        if (allThreads.isjson === true) {allThreads = JSON.parse((allThreads));}
        else if (allThreads.isjson === false) {allThreads = JSON.parse(JSON.stringify(allThreads));}
@@ -79,15 +78,12 @@ async function createBoard(ol,wm) {
     ipcMain.removeAllListeners('get-AllThreads');
     ipcMain.removeAllListeners('get-AllThreads-reply');
     ipcMain.on('get-AllThreads', async (event, ol, wm ) => { 
-      console.log('get-AllThreads2 is called, ol, wm ', ol, wm);
       const allThreads = await getAllThreadsIPC(ol, wm);
-      console.log('allThreads at get-AllThreads2, cjs ', allThreads);
       const serializedData = JSON.parse(JSON.stringify(allThreads));
       event.reply('get-AllThreads-reply', serializedData);
     });
   } else { ipcMain.on('get-AllThreads', async (event, ol, wm) => {
       const allThreads = await getAllThreadsIPC(ol, wm);
-      console.log('allThreads at get-AllThreads1, cjs ', allThreads);
       const serializedData = JSON.parse(JSON.stringify(allThreads));
       event.reply('get-AllThreads-reply', serializedData);});
   };
@@ -141,19 +137,24 @@ async function createBoard(ol,wm) {
     ipcMain.removeAllListeners('update-DBdata-reply');
     ipcMain.on('update-DBdata', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
-      console.log('data2 at update-DBdata servercjs ', ol,wm); 
-      const renewAllData = await updateDataIPC(renewData,ol,wm); 
-      const serializedData = JSON.parse(JSON.stringify(renewAllData));
-      console.log('serializedData2 servercjs ', serializedData);
-      event.reply('update-DBdata-reply', serializedData);
+      await updateDataIPC(renewData,ol,wm); 
+      const renewAllData = await getAllThreadsIPC(ol, wm);
+      if( typeof renewAllData !== JSON ) {const serializedData = JSON.parse(JSON.stringify(renewAllData));
+        console.log('serializedData2 servercjs ', serializedData);
+        event.reply('update-DBdata-reply', serializedData);}
+      else if (typeof renewAllData === JSON){ const serializedData = JSON.parse(renewAllData);
+        event.reply('update-DBdata-reply', serializedData);};
     });
   } else {
     ipcMain.on('update-DBdata', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
-      const renewAllData = await updateDataIPC(renewData,ol,wm);
-      const serializedData = JSON.parse(JSON.stringify(renewAllData));
-      event.reply('update-DBdata-reply', serializedData);});
-  };   
+      await updateDataIPC(renewData,ol,wm);
+      const renewAllData = await getAllThreadsIPC(ol, wm);
+      if( typeof renewAllData !== JSON ) {const serializedData = JSON.parse(JSON.stringify(renewAllData));
+        event.reply('update-DBdata-reply', serializedData);}
+      else if (typeof renewAllData === JSON){ const serializedData = JSON.parse(renewAllData);
+        event.reply('update-DBdata-reply', serializedData);};
+  });};
 
   if (ipcMain.eventNames().includes('delete-thread') && ipcMain.listenerCount('delete-thread') >= 1) {
     ipcMain.removeAllListeners('delete-thread');
@@ -180,7 +181,7 @@ async function createBoard(ol,wm) {
     ipcMain.on('thread-exchange', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
       console.log('data2 at thread-exchange servercjs ', ol,wm); 
-      const renewAllData = await deleteDataIPC(renewData,ol,wm); 
+      const renewAllData = await exchangeDataIPC(renewData,ol,wm); 
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
       console.log('serializedData2 servercjs ', serializedData);
       event.reply('thread-exchange-reply', serializedData);
@@ -189,7 +190,6 @@ async function createBoard(ol,wm) {
     ipcMain.on('thread-exchange', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
       const renewAllData = await exchangeDataIPC(renewData,ol,wm);
-      //console.log('renewAllData1 at exchange servercjs ', renewAllData);
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
       event.reply('thread-exchange-reply', serializedData);});
   };   
