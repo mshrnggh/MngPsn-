@@ -22,28 +22,29 @@ async function postReloadIPC(ol, wm, event){
      import('../mngSchema.mjs').then( async (module) => {
        const Thread = await module.Thread; let allThreads = [];
        try { if (ol === true) {
-         const filePath = path.join(__dirname, '../localData.json');
-         const fileData = await fs.promises.readFile(filePath,'utf-8');
-         localData = JSON.parse(fileData);
-       } else if (wm === true) {
-         const mongoData = await Thread.find({}, { _id: 1, title: 1, content: 1, straged: 1 });
-         const mongoDataCount = await Thread.countDocuments();
-         const mongoDataLimit = Math.min(mongoDataCount, 28);
-         mongoData.splice(mongoDataLimit); data = [...mongoData];
-         const filePath = path.join(__dirname, '../localData.json');
-         const fileData = await fs.promises.readFile(filePath,'utf-8');
-         localData = JSON.parse(fileData).slice(0,28);  
-         //const localDataLimit = Math.min(28 - mongoDataLimit, localData.length);
-         data = await [...data, ...localData.slice(0, 28)];
-       }      
-         data = await data.filter((thread) => thread.id || thread._id).slice(0, 28);
-         allThreads = await data.map((thread) => {
-         const id = thread.id || thread._id.toString();
-         const title = thread.title || thread['title:'] || '';
-         const content = thread.content || thread['content:'];
-          const straged = thread.straged || thread['straged:'];
-         return { id, title, content, straged };
-       }); resolve(allThreads);
+          const filePath = path.join(__dirname, '../localData.json');
+          const fileData = await fs.promises.readFile(filePath,'utf-8');
+          localData = JSON.parse(fileData);
+          } else if (wm === true) {
+            const mongoData = await Thread.find({}, { _id: 1, title: 1, content: 1, straged: 1 });
+            const mongoDataCount = await Thread.countDocuments();
+            const mongoDataLimit = Math.min(mongoDataCount, 28);
+            mongoData.splice(mongoDataLimit); data = [...mongoData];
+            const filePath = path.join(__dirname, '../localData.json');
+            const fileData = await fs.promises.readFile(filePath,'utf-8');
+            localData = JSON.parse(fileData).slice(0,28);  
+            //const localDataLimit = Math.min(28 - mongoDataLimit, localData.length);
+            data = await [...data, ...localData.slice(0, 28)];
+          }      
+          if(data) { console.log('data A', data); 
+            data = await data.filter((thread) => thread.id || thread._id).slice(0, 28);
+            allThreads = await data.map((thread) => {
+              const id = thread.id || thread._id.toString();
+              const title = thread.title || thread['title:'] || '';
+              const content = thread.content || thread['content:'];
+              const straged = thread.straged || thread['straged:'];
+              return { id, title, content, straged };});
+          }; console.log('allThreads at last', allThreads);resolve(allThreads);
        }catch(err){console.error(err);resolve([]);} 
      }); } catch (error) { console.error(error); reject(error); }
 });};

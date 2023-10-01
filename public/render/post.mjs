@@ -22,13 +22,9 @@ async function flipNotepad(event,submitterId,formSection) {
     await new Promise(resolve => setTimeout(resolve, 350));
     await addToDB(note, submitterId, formSection, event);
     formSection.classList.remove('flip');
-    // await new Promise(resolve => setTimeout(resolve, 0));
-    // formSection.style.display = 'none';
-    // await new Promise(resolve => setTimeout(resolve, 500));
-    // formSection.style.display = 'block';
     await new Promise(resolve => setTimeout(resolve, 0));
     formSection.classList.remove('show');
-    await new Promise(resolve => setTimeout(resolve, 500));
+    await new Promise(resolve => setTimeout(resolve, 350));
     formSection.classList.add('show');
     const inputTitle = document.querySelector('#inputTitle');
     const inputContent = document.querySelector('#inputContent');

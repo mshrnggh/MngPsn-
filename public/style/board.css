@@ -74,17 +74,13 @@ body {background-image: url('../images/BoardsWooden.jpg');object-fit: cover;
   background-repeat:no-repeat;position:relative;background-size:cover;object-fit: cover;
   z-index:1;width:91%;height:85vh;box-shadow:0.3vw 0.3vw 0.7vw #040404;
   border-radius:0.75vw;font-size:1.125vw;font-weight:bold;
-  opacity:1;filter:brightness(1.0);text-align:center;}
-.form-section {
-  /* 既存のスタイル */
-  transition: transform 0.5s ease-in-out;
-  transform: translateY(100%);
+  opacity:1;filter:brightness(1.0);text-align:center;
+  transition:transform 0.35s ease-in-out;transform: translateY(100%);
 }
-
 .form-section.show {transform:translateY(0);}
-.form-section.flip{ animation: flip 0.34s infinite cubic-bezier(0.1, 0.2, 0.7, 1);
+.form-section.flip{ animation: flip 0.34s infinite cubic-bezier(0.1, 0.3, 0.6, 1);
   transform-style: preserve-3d;transform-origin: top right;
-  transform: perspective(700vw) rotate3d(1, 0.7, 0, 100deg); opacity: 0.2;}
+  transform: perspective(700vw) rotate3d(1, 0.7, 0, 100deg); opacity: 0.1;}
 @keyframes flip {
   0% {transform: perspective(700vw) rotate3d(0.1, 0.1, 0, 0deg);opacity: 0.9;};
   5% {transform: perspective(700vw) rotate3d(0.2, 0.1, 0, 5deg);opacity: 0.9;};
@@ -97,16 +93,16 @@ body {background-image: url('../images/BoardsWooden.jpg');object-fit: cover;
   40% {transform: perspective(700vw) rotate3d(0.6, 0.3, 0, 25deg);opacity: 0.7;};
   45% {transform: perspective(700vw) rotate3d(0.6, 0.4, 0, 30deg);opacity: 0.6;};
   50% {transform: perspective(700vw) rotate3d(0.7, 0.4, 0, 35deg);opacity: 0.6;};
-  55% {transform: perspective(700vw) rotate3d(0.7, 0.4, 0, 40deg);opacity: 0.5;};
+  55% {transform: perspective(700vw) rotate3d(0.7, 0.4, 0, 40deg);opacity: 0.6;};
   60% {transform: perspective(700vw) rotate3d(0.8, 0.5, 0, 45deg);opacity: 0.5;};
   65% {transform: perspective(700vw) rotate3d(0.8, 0.5, 0, 50deg);opacity: 0.4;};
   70% {transform: perspective(700vw) rotate3d(0.9, 0.5, 0, 55deg);opacity: 0.3;};
   75% {transform: perspective(700vw) rotate3d(0.9, 0.6, 0, 60deg);opacity: 0.2;};
   80% {transform: perspective(700vw) rotate3d(1, 0.6, 0, 65deg);opacity: 0.1;};
-  85% {transform: perspective(700vw) rotate3d(1, 0.6, 0, 70deg);opacity: 0.0;};
-  90% {transform: perspective(700vw) rotate3d(1, 0.7, 0, 80deg);opacity: 0.0;};
+  85% {transform: perspective(700vw) rotate3d(1, 0.6, 0, 70deg);opacity: 0;};
+  90% {transform: perspective(700vw) rotate3d(1, 0.7, 0, 80deg);opacity: 0;};
   95% {transform: perspective(700vw) rotate3d(1, 0.7, 0, 90deg);opacity: 0;};
-  100% {transform: perspective(700vw) rotate3d(0, 0, 0, 100deg);opacity: 1;};
+  100% {transform: perspective(700vw) rotate3d(0, 0, 0, 95deg);opacity: 0;};
 }
 #inputTitle{opacity:0.7;font-size:1.25vw;font-weight:bold;width:97%;object-fit: cover;background-image: url('../images/memopaper1.png');
   background-repeat: no-repeat;box-shadow: inset 0.1vw 0.1vw 0.1vw #040404;}
