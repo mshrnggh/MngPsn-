@@ -10,12 +10,11 @@ document.addEventListener('DOMContentLoaded', async()=>{
   await strageExchange.addEventListener('drop', drop); 
 });
 
- export async function dragStart(event) {   
+export async function dragStart(event) {   
    await event.dataTransfer.setData('text/plain', JSON.stringify({
      id:this.dataset.id, title:this.dataset.title, content:this.dataset.content, 
-     straged:this.dataset.straged, value: this.value}));
-   setTimeout(() => {this.className += ' ondrag';}, 0);
-   event.currentTarget.style.opacity = '1';   
+     straged:this.dataset.straged, value: this.value}));  
+  setTimeout(() => {this.className += ' ondrag';}, 0);
 }
 
 export async function dragEnd(event) {
@@ -23,16 +22,9 @@ export async function dragEnd(event) {
   this.className = 'singleThread';  
 }
 
-export async function dragOver(event) {
-  event.preventDefault();
-  await this.classList.add("hovered");
-  event.currentTarget.style.opacity = '0.5';  
-}
+export async function dragOver(event){event.preventDefault(); await this.classList.add("hovered");}
 
-export async function dragLeave(event) {  
-  await this.classList.remove("hovered");
-  event.currentTarget.style.opacity = '1';
-}
+export async function dragLeave(event){await this.classList.remove("hovered");}
 
 export async function drop(event) { 
   await this.classList.remove("hovered");

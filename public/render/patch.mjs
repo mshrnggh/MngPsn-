@@ -3,7 +3,6 @@ document.addEventListener('DOMContentLoaded', () => {
   document.addEventListener('click', async (event) => {
     const thisSingThre = event.target.closest('.singleThread'); 
     if (thisSingThre) {
-      console.log('event.target, thisSingThre.querySelector(".thread-title") ', event.target, thisSingThre.querySelector(".thread-title")); 
       const singleThreads = document.querySelectorAll('.singleThread');
       singleThreads.forEach(singleThread => {
         if (thisSingThre === singleThread) {
@@ -25,14 +24,13 @@ document.addEventListener('DOMContentLoaded', () => {
             
 async function handleClick(event,formSection) { event.preventDefault(); 
   let data, ol, wm;  
-  console.log('formSection1 postmjs',formSection);
   const inputTitle = document.querySelector('#inputTitle');
   const inputContent = document.querySelector('#inputContent');
   let lockedThread;
   while (!lockedThread) {
     lockedThread = document.querySelector('.singleThread.locked');
     await new Promise(resolve => setTimeout(resolve, 100));
-  }; console.log('lockedThread ', lockedThread);
+  }; 
   const id = lockedThread.dataset.id;
   const straged = lockedThread.dataset.straged;
   const newTitle = inputTitle.value.trim();
@@ -51,20 +49,16 @@ async function handleClick(event,formSection) { event.preventDefault();
         else {data = JSON.parse(JSON.stringify(newAllData));}
         const allThreList = await createBoardList(data);
         const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
-        console.log('formSection2', formSection);
-        await flipModify(event,formSection);
-        await createBoardColumns(allThreads);      
+        await flipModify(event,formSection); await createBoardColumns(allThreads);      
   });});};
 };
     
 async function flipModify(event, formSection) {
-  console.log('flipModify called event, formSection ', event, formSection);
   if(!event||event.target.nodeName!=='BUTTON') {return;}
   if(!formSection){console.error('formSection not found');return;};
   await flipAnination(event,formSection);
   async function flipAnination (event, formSection) {
     formSection.classList.add('flip');
-    console.log('in the middle of flipModify, formSec',formSection)
     await new Promise(resolve => setTimeout(resolve, 350));
     formSection.classList.remove('flip');
     await new Promise(resolve => setTimeout(resolve, 0));
@@ -79,8 +73,7 @@ async function flipModify(event, formSection) {
 };
     
 function displayContent(singleThread) {
-  console.log('dipslayContent is called!');
-  console.log('singleThread ', singleThread);
+  console.log('dipslayContent is called!', singleThread);
   if (!singleThread) return;
   const title = singleThread.querySelector('.thread-title').textContent;
   const content = singleThread.dataset.content;

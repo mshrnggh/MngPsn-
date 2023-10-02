@@ -3,11 +3,8 @@ let ol = false; let wm = false; let data = [];
 import { dragStart, dragEnd} from "./delchang.mjs";
 document.addEventListener('DOMContentLoaded', () => {
   const formSection = document.querySelector('.form-section');
-  console.log('formSection1',formSection);
   formSection.addEventListener('submit', async (event)=>{
     event.preventDefault(); const submitterId=event.submitter.id;
-    //const formSection = document.querySelector('.form-section');
-    console.log('formSection2',formSection);
     await flipNotepad(event,submitterId,formSection);});
 });
 async function flipNotepad(event,submitterId,formSection) {
@@ -18,7 +15,6 @@ async function flipNotepad(event,submitterId,formSection) {
     const formData = new FormData(formSection);
     const title=formData.get('inputTitle');const content=formData.get('inputContent');
     const note={title,content};formSection.classList.add('flip');
-    console.log('in the middle of flipAnination, formSec',formSection)
     await new Promise(resolve => setTimeout(resolve, 350));
     await addToDB(note, submitterId, formSection, event);
     formSection.classList.remove('flip');
@@ -43,7 +39,6 @@ async function showReloadList(newAllThre) {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata'); 
   await window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args; 
-    console.log('typeof1 data, newAllThre ', typeof data, typeof newAllThre);
     if (typeof data === "json") {data = JSON.parse(data);}
     else {data = JSON.parse(JSON.stringify(data));}
     const allReloadThre = await createReloadList(newAllThre);

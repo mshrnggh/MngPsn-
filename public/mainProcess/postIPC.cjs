@@ -33,7 +33,6 @@ async function postReloadIPC(ol, wm, event){
             const filePath = path.join(__dirname, '../localData.json');
             const fileData = await fs.promises.readFile(filePath,'utf-8');
             localData = JSON.parse(fileData).slice(0,28);  
-            //const localDataLimit = Math.min(28 - mongoDataLimit, localData.length);
             data = await [...data, ...localData.slice(0, 28)];
           }      
           if(data) {  
