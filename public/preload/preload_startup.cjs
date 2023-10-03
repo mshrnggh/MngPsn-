@@ -1,23 +1,17 @@
-const { contextBridge, ipcRenderer, ipcMain } = require('electron');
-contextBridge.exposeInMainWorld('myAPI', {
+const { contextBridge, ipcRenderer } = require('electron');
+contextBridge.exposeInMainWorld('startUpAPI', {
   sendConfig: (configData) => {
     return new Promise((resolve, reject) => {
-      ipcRenderer.invoke('startup-config-data', configData)
-      .then((result) => {resolve(result)}).catch((error) => {reject(error)});
-      });
-   }
-});
-
-contextBridge.exposeInMainWorld('electron', {
-  ipcRenderer: {
-    send: (channel, data) => {
-      ipcRenderer.send(channel, data);
-    },
-    on: (channel, callback) => {
+      ipcRenderer.removeAllListeners('startup-config-data');
+      ipcRenderer.send('startup-config-data', configData)
+      .then(() => {console.log('Config data sent successfully');resolve();})
+      .catch((err) => {console.error('Error sending config data:', err);reject(err);});
+    });
+  },
+  sendToMain: (channel, data) => {ipcRenderer.send(channel, data);},
+  on: (channel, callback) => {
+    const allowedChannels = ['mongodb-uri-incorrect-reply', 'connecttomongodb', 'serveron', 'correct-localport','nouseMongodb'];
+    if (allowedChannels.includes(channel)) {
       ipcRenderer.on(channel, (event, ...args) => callback(...args));
-    },
-    invoke: (channel, data) => {
-      return ipcRenderer.invoke(channel, data);
-    }
-  }
+    };},
 });
