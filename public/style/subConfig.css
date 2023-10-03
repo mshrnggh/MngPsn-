@@ -1,0 +1,84 @@
+body {
+    background-image: url('../images/BoardsWooden.jpg');
+    width: 100vw;
+    height: 100vh;
+    overflow-x: hidden;
+    display: center;
+    justify-content: center;
+    align-items: center;
+}y
+
+.config {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+}
+
+.mongo-config-set {
+    font-size: 3vw;
+    color: rgb(255, 141, 167);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-shadow: 0.1vw 0.1vw 0.1vw rgb(92, 9, 29), -0.1vw -0.1vw 0.1vw rgb(212, 0, 95), 0.1vw -0.1vw 0.1vw rgba(134, 0, 112, 0.768), -0.1vw 0.1vw 0.1vw rgb(3, 0, 3);
+}
+
+#mongodb-conf {
+    color: rgba(244, 244, 255, 0.974);
+    margin-top: 3vw;
+    font-size: 1.5vw;
+    font-weight: bold;
+    text-align: center;
+    box-shadow: 0 0 1vw rgba(0, 0, 0, 1.5);
+    text-shadow: 0.1vw 0.1vw 0.1vw rgb(1, 19, 53), -0.1vw -0.1vw 0.1vw rgb(2, 58, 41), 0.1vw -0.1vw 0.1vw rgb(13, 64, 247), -0.1vw 0.1vw 0.1vw rgba(1, 162, 255, 0.734);
+}
+
+#mongodb-conf textarea {
+    background-color: rgb(253, 248, 248);
+    color: black;
+    font-size: 1.5vw;
+    font-weight: bold;
+    width: 95vw;
+    margin: 0 auto;
+    display: block;
+}
+
+#mongodb-uri {
+    box-shadow: inset 0 0 1vw rgba(0, 0, 0, 1.5);
+}
+
+.conf-submit {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 5vh;
+}
+
+.conf-submit button {
+    font-size: 3vw;
+    color: rgb(108, 0, 58);
+    background-color: rgba(230, 182, 27, 0.887);
+    border: none;
+    border-radius: 1vw;
+    box-shadow: 0 0.3vw 0 0 rgba(0, 0, 0, 1.0);
+    text-shadow: 0.1vw 0.1vw 0.1vw rgba(34, 1, 15, 0.85), -0.1vw -0.1vw 0.1vw rgb(252, 238, 110), 0.1vw -0.1vw 0.1vw rgba(254, 106, 172, 0.854), -0.1vw 0.1vw 0.1vw rgba(32, 1, 13, 0.566);
+    transition: all 0.1s ease-in-out;
+}
+
+.conf-submit button:active {
+    box-shadow: 0 0.1vw 0 0 rgba(0, 0, 0, 1.0);
+    transform: translateY(0.3vh);
+}
+
+.conf-submit button:hover {
+    animation: blinkC 1s infinite;
+    border: 0.5vw solid rgb(255, 255, 95);
+}
+
+@keyframes blinkC {
+    0% {border-color: rgb(255, 255, 95);}
+    50% {border-color: transparent;}
+    100% {border-color: rgb(255, 255, 95);}
+}
