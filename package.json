@@ -8,7 +8,11 @@
 "scripts": {
 "dev": "electron .",
 "server": "node --experimental-modules server.cjs",
-"start": "electron main.cjs"
+"start": "electron main.cjs",
+"start forge": "electron-forge start",
+"package": "electron-forge package",
+"make": "electron-forge make",
+"publish": "electron-forge publish"
 },
 "dependencies": {
 "axios": "^1.4.0",
