@@ -1,17 +1,32 @@
-const { contextBridge, ipcRenderer } = require('electron');
+const { contextBridge, ipcRenderer, remote } = require('electron');
 contextBridge.exposeInMainWorld('startUpAPI', {
   sendConfig: (configData) => {
     return new Promise((resolve, reject) => {
       ipcRenderer.removeAllListeners('startup-config-data');
       ipcRenderer.send('startup-config-data', configData)
-      .then(() => {console.log('Config data sent successfully');resolve();})
-      .catch((err) => {console.error('Error sending config data:', err);reject(err);});
-    });
+     });//ipcrendere.sendは、Promiseオブジェクトを返さないので、.then.catchできないので注意。
   },
   sendToMain: (channel, data) => {ipcRenderer.send(channel, data);},
-  on: (channel, callback) => {
-    const allowedChannels = ['mongodb-uri-incorrect-reply', 'connecttomongodb', 'serveron', 'correct-localport','nouseMongodb'];
+  on: async (channel, callback) => {
+    const allowedChannels = ['mongodb-uri-incorrect-reply', 'mongodb-uri-incorrect','mongodb-uri-empty','connecttomongodb','nousemongodb'];
     if (allowedChannels.includes(channel)) {
-      ipcRenderer.on(channel, (event, ...args) => callback(...args));
-    };},
+      await ipcRenderer.removeAllListeners(channel);
+      await ipcRenderer.on(channel, (event, ...args) => {callback(...args);});
+  };},
+  windowClose: () => {const window = remote.getCurrentWindow();window.close();},  
+  removeChannel: async (channel) => {
+    await ipcRenderer.removeAllListeners(channel);  
+    console.log(`${channel} is removed`);
+  },
+  send: async (channel, ...args) => {
+    await ipcRenderer.removeAllListeners(channel);
+    await ipcRenderer.send(channel, ...args);
+    console.log(`${channel} is sent with data`, args);
+  }, 
+  receive: async (channel, func) => { 
+    await ipcRenderer.removeAllListeners(channel);
+    await ipcRenderer.on(channel, async (event, ...args) => {
+      console.log(`${channel} is on with args`, args); await func(...args);
+    });
+  }
 });

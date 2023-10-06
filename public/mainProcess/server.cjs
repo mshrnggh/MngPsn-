@@ -2,43 +2,60 @@ const {registLocal,registMongo}=require('./postIPC.cjs');
 const {getAllThreadsIPC}=require('./getIPC.cjs');
 const {getResearchIPC}=require('./searchIPC.cjs');
 const {updateDataIPC}=require('./patchIPC.cjs');
+const path = require("path");
 const {deleteDataIPC, exchangeDataIPC }=require('./delchanIPC.cjs');
-const {ipcMain}=require("electron");const fs=require("fs");const path=require("path");
+const {startUp, subConfig} = require(path.join(__dirname, './startup.cjs'));
+const {getStartupWindow}=require('./startup.cjs');
+const {ipcMain}=require("electron");const fs=require("fs");
 const url=require('url');const dotenv=require("dotenv");dotenv.config();
 const express=require("express");const appExpr=express();appExpr.use(express.json());
 const mongoose=require("mongoose");let boardWindow;
 let mongodbUriValue="";let wm=false;let ol=false;
 
-async function startServer(mongodbUriValue,wm,ol){ 
-  if (wm===true){mongodbUriValue=mongodbUriValue||process.env.MONGO_URI;
-    try{useMongoDB(mongodbUriValue);}catch(error){console.error(error);}
-  }else if(ol===true){nouseMngdb();}await createBoard(ol,wm);
-};
-async function useMongoDB(mongodbUriValue,res){ 
-  if(mongodbUriValue===process.env.MONGO_URI){return new Promise((resolve,reject)=>{
-      mongoose.connect(process.env.MONGO_URI,{useNewUrlParser:true,useUnifiedTopology:true})
-      .then(()=>{ipcMain.on('connecttomongodb',(event)=>{event.reply("Connected to MongoDB Atlas");});
-        const server=appExpr.listen(process.env.PORT,()=>{
-          ipcMain.on('serveron',(event)=>{event.reply(`Server running on port ${process.env.PORT}`);});
-          resolve(server);
-    });}).catch(error=>{reject(error);});});
-  }else if(mongodbUriValue&&mongodbUriValue!==process.env.MONGO_URI){
-    return new Promise((resolve,reject)=>{
-      mongoose.connect(mongodbUriValue,{useNewUrlParser:true,useUnifiedTopology:true})
-      .then(async()=>{ipcMain.on('connecttomongodb',async(event)=>{event.reply("Connected to MongoDB Atlas");});
-        process.env.MONGO_URI = mongodbUriValue;const envPath=path.join(__dirname,'.env');
-        const envContent=await fs.readFileSync(envPath,'utf-8');
-        const newEnvContent=await envContent.replace(`MONGO_URI=${process.env.MONGO_URI}`,`MONGO_URI=${mongodbUriValue}`);
-        await fs.writeFileSync(envPath, newEnvContent);
-        const server=await appExpr.listen(process.env.PORT,()=>{
-          ipcMain.on('serveron',async(event)=>{event.reply(`Server running on port ${process.env.PORT}`);});
-          resolve(server);
-      });}).catch(error=>{reject(error);
-        ipcMain.on('mongodb-uri-incorrect',(event)=>{
-          event.reply('mongodb-uri-incorrect-reply','MongoDB Atlas URI is incorrect!');
-  });});});}
-}
-function nouseMngdb(){ipcMain.on('nouseMongodb',(event)=>{event.reply('今回はMongoDBを使いません。')});}
+async function startServer(mongodbUriValue, wm, ol){ 
+  if (wm===true){
+    if(!mongodbUriValue){
+    const startupWindow = getStartupWindow();
+    await startupWindow.webContents.send('mongodb-uri-empty'); 
+    await new Promise ((resolve) => {
+      ipcMain.removeAllListeners('mongodb-uri-empty-reply');
+      ipcMain.on('mongodb-uri-empty-reply', () => { resolve(); });});
+    await startUp();     
+    } else { await useMongoDB(mongodbUriValue, ol, wm);}      
+
+  } else if (ol===true) { 
+    const startupWindow = getStartupWindow();
+    await startupWindow.webContents.send('nousemongodb'); 
+    await new Promise ((resolve) => {
+      ipcMain.removeAllListeners('nousemongodb-reply');
+      ipcMain.on('nousemongodb-reply', () => { resolve(); });
+    });
+    await createBoard(ol,wm);};
+  };
+  
+  async function useMongoDB(mongodbUriValue, ol, wm){ 
+    //return new Promise(async (resolve) => {.then/catch}では、mongo.connect自体が
+    //エラー時にエラーをスローしてしまい、.catchは実行されない。Promise化しない方がエラー時にはcatch{}が実行される。
+    //これは、try{}のなかmongoose.connectを利用しているからである。
+    try {  await mongoose.connect(mongodbUriValue, {
+      useNewUrlParser: true, useUnifiedTopology: true })
+      const startupWindow = getStartupWindow();
+      await startupWindow.webContents.send('connecttomongodb'); 
+      await new Promise ((resolve) => {
+        ipcMain.removeAllListeners('connecttomongodb-reply');
+        ipcMain.on('connecttomongodb-reply', async () => { 
+          await createBoard(ol,wm); await resolve(); });
+      }); 
+    } catch (error) {          
+      const startupWindow = getStartupWindow();
+      await startupWindow.webContents.send('mongodb-uri-incorrect');
+      await new Promise( (resolve) => {
+        ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');
+        ipcMain.on('mongodb-uri-incorrect-reply', async () => {
+          await resolve();});
+      }); await startUp(); //throw error;
+    };
+  };
 
 async function createBoard(ol,wm) {
   const {BrowserWindow,app}=require("electron");let Thread='';

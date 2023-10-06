@@ -26,6 +26,7 @@ function startUp() {
     protocol: 'file:',
     slashes: true
   }));
+  return startupWindow;
 };
 
 function subConfig() {
@@ -46,9 +47,9 @@ function subConfig() {
       contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
     },});
     subConfigWindow.loadURL(url.format({
-    pathname: path.join(__dirname, '../render/subConfig.html'),
-    protocol: 'file:',
-    slashes: true
+      pathname: path.join(__dirname, '../render/subConfig.html'),
+      protocol: 'file:',
+      slashes: true
     }));
 };
 

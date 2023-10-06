@@ -1,43 +1,84 @@
-const wmngdbButton = document.querySelector('.WMngdb');
-const olocalButton = document.querySelector('.OLocal');
-const mongodbConf = document.getElementById('mongodb-conf');
-const config = document.querySelector('.config');
-let wm = false;let ol = false;let mongodbUriValue = '';
-
-wmngdbButton.addEventListener('click', () => { mongodbConf.style.display = 'block';
-  config.style.display = 'block'; wmngdbButton.disabled = true; olocalButton.disabled = true;
-  wm = true; mongodbUriValue = document.getElementById('mongodb-uri').value;
-  window.startUpAPI.sendToMain('start-server', {wm,ol,mongodbUriValue});
-});
-
-olocalButton.addEventListener('click', () => {config.style.display = 'none';
-  wmngdbButton.disabled = true;olocalButton.disabled = true;ol = true;
-  window.startUpAPI.sendConfig({ wm,ol,mongodbUriValue});
-});
-
 window.addEventListener('DOMContentLoaded', () => {
-  const confSubmit = document.querySelector('.conf-submit');
-  confSubmit.addEventListener('submit', async (event) => {
-    event.preventDefault();
-    //try {
-      await window.startUpAPI.sendConfig({wm, ol, mongodbUriValue});
-    //  window.alert('Config data sent successfully');
-    //} catch (error) {
-    //  console.error('Error sending config data:', error);//ここをwindow.alert(error)にすると、エラーが出てプログラムがとまってしまう。
-    //}
+  const wmngdbButton = document.querySelector('.WMngdb');
+  const olocalButton = document.querySelector('.OLocal');
+  const mongodbConf = document.getElementById('mongodb-conf');
+  const config = document.querySelector('.config');
+  const customAlert = document.getElementById('custom-alert');
+  customAlert.style.display = 'none'; 
+  let wm = false;let ol = false;let mongodbUriValue = '';
+  
+  wmngdbButton.addEventListener('click', () => { mongodbConf.style.display = 'block';
+    config.style.display = 'block'; wmngdbButton.disabled = true; olocalButton.disabled = true;
+    wm = true;  if (window.startUpAPI) {
+    window.startUpAPI.sendToMain('start-server', {wm,ol,mongodbUriValue});};
   });
-});
 
-// in case MongoDB Atlas URI and/or Local port is/are incorrect
-window.startUpAPI.on('mongodb-uri-incorrect-reply', (event, message) => {
-  window.alert(message);
+  olocalButton.addEventListener('click', () => {config.style.display = 'none';
+    wmngdbButton.disabled = true;olocalButton.disabled = true;ol = true;
+    window.startUpAPI.sendConfig({ wm,ol,mongodbUriValue});
+  });
+  
+  const confSubmit = document.querySelector('.conf-submit');
+  if (confSubmit) {
+    confSubmit.addEventListener('submit', async (event) => {
+    event.preventDefault();
+    mongodbUriValue = document.getElementById('mongodb-uri').value;
+    if (window.startUpAPI) {
+      window.startUpAPI.sendConfig({wm, ol, mongodbUriValue})        
+    };});
+  };
 });
-window.startUpAPI.on('connecttomongodb', (event, message) => {
-  window.alert(message);
-});
-window.startUpAPI.on('serveron', (event, message) => {
-  window.alert(message);
-});
-window.startUpAPI.on('correct-localport', (event, message) => {
-  window.alert(message);
-});
+  
+window.startUpAPI.on('mongodb-uri-incorrect', async (event, message) => {
+  console.log('mongodb-uri-incorrect event received in mjs');
+  const messageBoxOptions={message:'Your MongoDB Atlas URI is incorrect, please set it right first.'};
+  const customAlert = document.getElementById('custom-alert');
+  const alertMessage = document.getElementById('alert-message');
+  const okButton = customAlert.querySelector('button'); 
+  alertMessage.textContent = messageBoxOptions.message;
+  customAlert.style.display = 'block';
+  await new Promise((resolve) => {
+    okButton.addEventListener('click', async () => {
+      window.startUpAPI.send('mongodb-uri-incorrect-reply'); resolve();      
+    });         
+});}); 
+
+window.startUpAPI.on('mongodb-uri-empty', async (event, ...args) => {
+  const messageBoxOptions={message:'Your MongoDB Atlas URI is empty, please set it first.'};
+  const customAlert = document.getElementById('custom-alert');
+  const alertMessage = document.getElementById('alert-message');
+  const okButton = customAlert.querySelector('button'); // OKボタンを取得
+  alertMessage.textContent = messageBoxOptions.message;
+  customAlert.style.display = 'block';
+  await new Promise((resolve) => {
+    okButton.addEventListener('click', async () => {
+      window.startUpAPI.send('mongodb-uri-empty-reply'); resolve();      
+    });         
+});});
+
+window.startUpAPI.on('nousemongodb', async (event, ...args) => {
+  console.log('nousemongodb event received in mjs');
+  const messageBoxOptions={message:'MongoDB Atlas is not utilized this time.'};
+  const customAlert = document.getElementById('custom-alert');
+  const alertMessage = document.getElementById('alert-message');
+  const okButton = customAlert.querySelector('button'); // OKボタンを取得
+  alertMessage.textContent = messageBoxOptions.message;
+  customAlert.style.display = 'block';
+  await new Promise((resolve) => {
+    okButton.addEventListener('click', async () => {
+      window.startUpAPI.send('nousemongodb-reply'); resolve();      
+    });         
+});});
+
+window.startUpAPI.on('connecttomongodb', async (event, message) => {
+  const messageBoxOptions={message:'Your MongoDB Atlas is connected right.'};
+  const customAlert = document.getElementById('custom-alert');
+  const alertMessage = document.getElementById('alert-message');
+  const okButton = customAlert.querySelector('button'); // OKボタンを取得
+  alertMessage.textContent = messageBoxOptions.message;
+  customAlert.style.display = 'block';
+  await new Promise((resolve) => {
+    okButton.addEventListener('click', async () => {
+      window.startUpAPI.send('connecttomongodb-reply'); resolve();      
+    });         
+});});
