@@ -17,18 +17,23 @@ body {background-image: url('../images/BoardsWooden.jpg');object-fit: cover;
  { font-size:1.25vw;font-weight: bold;width: 40vw; border-width: 0.2vw;
   height: 3.75vh;border-radius: 0.75vw;opacity:0.75;justify-content: center;
   box-shadow: inset 0.1vw 0.1vw 0.1vw #040404;}
-#getAllThreAgain {transition:transform 0.05s;font-size:1.25vw;font-weight:bold;width:20vw;border-width:0.375vw;height:4.75vh;
-   background-image:url('../images/silver3.png');background-position: center calc(20% - 0.25vh);
-   background-repeat:no-repeat;background-size:100%;border-radius:0.75vw;color:rgb(0, 68, 255);background-color:rgba(255, 255, 255, 0.4);justify-content: center;margin-right:7vw;box-shadow: 0.1vw 0.1vw 0.1vw #04040490;}
+#getAllThreAgain,#search-button{background-image: url('../images/silver3.png');font-size: 1.25vw;
+background-position: center calc(20% - 0.25vh);background-repeat: no-repeat;background-size: cover;
+font-weight: bold;border-radius: 0.75vw;transition: transform 0.05s;height: 4.5vh;border-width: 0.2vw;
+color: rgba(255, 210, 0, 1); box-shadow: 0.15vw 0.15vw 0.1vw #6e2c0088;
+text-shadow: 0.1vw 0.1vw 0.1vw rgba(70, 45, 0, 0.85),
+            -0.1vw -0.1vw 0.1vw rgba(230, 200, 35, 0.25),
+             0.1vw -0.1vw 0.1vw rgba(230, 200, 35, 0.25),
+            -0.1vw 0.1vw 0.1vw rgba(70, 45, 0, 0.85);
+}
+#getAllThreAgain {width:20vw;justify-content: center;margin-right:7vw;}
 #getAllThreAgain:active {transform:translateY(0.2vh) translateX(0.2vw);}
 
 #search-input:hover,#getAllThreAgain:hover{animation: blinkSI 1.5s infinite; border: 0.2vw solid rgb(255, 175, 20);}
 @keyframes blinkSI {0% {border-color: rgb(255, 175, 20);}
     50% {border-color: transparent;}
     100% {border-color: rgb(255, 175, 20);}}
-#search-button {background-image: url('../images/silver3.png');background-position: center ;
-  background-size:cover;background-repeat:no-repeat;transition: transform 0.05s;width:7vw; height: 4vh;border-radius:0.75vw;border-width:0.2vw;margin-left:2vw;margin-left: 1vw;
-  font-size:1.25vw; color: rgb(3, 66, 255);background-color: rgba(255, 255, 255, 0.4);font-weight: bold;box-shadow: 0.2vw 0.2vw 0.1vw #040404;}
+#search-button {width:7vw;margin-left:2vw;margin-left:1vw;}
 #search-button:hover {animation: blinkS 1s infinite;border: 0.2vw solid rgb(255, 172, 17);}
 #search-button:active {transform: translateY(0.2vh) translateX(0.2vw);}
 @keyframes blinkS {0% {border-color: rgb(250, 189, 76);}
@@ -123,13 +128,17 @@ body {background-image: url('../images/BoardsWooden.jpg');object-fit: cover;
 #submitLocal,
 #submitMongoDB,
 #to_mongoConfig,
-#modify{transition:transform 0.05s;font-size:1vw;font-weight:bold;border-radius:0.75vw;object-fit:cover;
+#modify{transition:transform 0.05s;font-size:1.25vw;font-weight:bold;border-radius:0.75vw;object-fit:cover;
   background-image:url('../images/silver3.png');background-size:cover;background-repeat:no-repeat;
-  width:12vw;height:3vh;border:none;cursor:pointer;text-align:center;margin-left:0vw;margin-top:0.2vh;margin-bottom:0.2vh;white-space:pre-wrap;
-  display: flex;background-position: center calc(1% - 1vw);justify-content:center;box-shadow: 0.1vw 0.1vw 0.1vw #040404;}
-#to_mongoConfig {color:#632801;
-  text-shadow: 0.1vw 0.1vw 0.1vw rgba(165, 0, 0, 0), -0.2vw -0.2vw 0.4vw rgba(255, 219, 157, 0.5), 0.2vw -0.2vw 0.4vw rgba(255, 197, 142, 0.5), -0.2vw 0.2vw 0.4vw rgb(190, 0, 0);
+  width:12vw;height:3.75vh;border:none;cursor:pointer;text-align:center;margin-left:0vw;margin-top:0.2vh;margin-bottom:0.2vh;white-space:pre-wrap;
+  display: flex;background-position: center calc(1% - 1vw);justify-content:center;box-shadow: 0.1vw 0.1vw 0.1vw #040404;
+  color:black;
+  text-shadow: 0.1vw 0.1vw 0.1vw rgba(5, 5, 5, 0.25),
+    -0.1vw -0.1vw 0.1vw rgba(255, 245, 255, 0.25),
+    0.1vw -0.1vw 0.1vw rgba(255, 245, 255, 0.25),
+    -0.1vw 0.1vw 0.1vw rgba(5, 5, 5, 0.25);
 }
+
 #submitLocal:hover,
 #submitMongoDB:hover,
 #to_mongoConfig:hover,

@@ -1,22 +1,20 @@
 const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('subConfigAPI', {
-  subConfig: (configData) => {
-    console.log('subConfigAPI sending configData: ', configData)
+  sendConfig: (configData) => {
     return new Promise((resolve, reject) => {
-      console.log('before send sub-config-data', configData);
+      ipcRenderer.removeAllListeners('sub-config-data');
       ipcRenderer.send('sub-config-data', configData)
-      .then(() => {console.log('sub-config data sent successfully');
-       resolve();})
-      .catch((err) => {
-         console.error('Error sending sub-config data:', err);
-         reject(err);
-       });
-    });
+     });//ipcrendere.sendは、Promiseオブジェクトを返さないので、.then.catchできないので注意。
   },
-  on: (channel, callback) => {
-    const allowedChannels = ['mongodb-uri-incorrect-reply', 'connecttomongodb', 'serveron', 'correct-localport','nouseMongodb'];
+  send: async (channel, ...args) => {
+    await ipcRenderer.removeAllListeners(channel);
+    await ipcRenderer.send(channel, ...args);
+    console.log(`${channel} is sent with data`, args);
+  },
+  on: async (channel, callback) => {
+    const allowedChannels = ['mongodb-uri-incorrect','mongodb-uri-empty','connecttomongodb'];
     if (allowedChannels.includes(channel)) {
-      ipcRenderer.on(channel, (event, ...args) => callback(...args));
-    }
-  }
+      await ipcRenderer.removeAllListeners(channel);
+      await ipcRenderer.on(channel, (event, ...args) => {callback(...args);});
+  };}
 });

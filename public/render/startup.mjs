@@ -31,7 +31,7 @@ window.addEventListener('DOMContentLoaded', () => {
   
 window.startUpAPI.on('mongodb-uri-incorrect', async (event, message) => {
   console.log('mongodb-uri-incorrect event received in mjs');
-  const messageBoxOptions={message:'Your MongoDB Atlas URI is incorrect, please set it right first.'};
+  const messageBoxOptions={message:'Your MongoDB Atlas URI is incorrect, please click the bellow [OK}-button to set it right first.'};
   const customAlert = document.getElementById('custom-alert');
   const alertMessage = document.getElementById('alert-message');
   const okButton = customAlert.querySelector('button'); 
@@ -44,7 +44,7 @@ window.startUpAPI.on('mongodb-uri-incorrect', async (event, message) => {
 });}); 
 
 window.startUpAPI.on('mongodb-uri-empty', async (event, ...args) => {
-  const messageBoxOptions={message:'Your MongoDB Atlas URI is empty, please set it first.'};
+  const messageBoxOptions={message:'Your MongoDB Atlas URI is empty, please click the below [OK]-buttibn to set it first.'};
   const customAlert = document.getElementById('custom-alert');
   const alertMessage = document.getElementById('alert-message');
   const okButton = customAlert.querySelector('button'); // OKボタンを取得
@@ -58,7 +58,7 @@ window.startUpAPI.on('mongodb-uri-empty', async (event, ...args) => {
 
 window.startUpAPI.on('nousemongodb', async (event, ...args) => {
   console.log('nousemongodb event received in mjs');
-  const messageBoxOptions={message:'MongoDB Atlas is not utilized this time.'};
+  const messageBoxOptions={message:'MongoDB Atlas is not utilized this time. The bellow [OK]-button-click is to lead you ahead.'};
   const customAlert = document.getElementById('custom-alert');
   const alertMessage = document.getElementById('alert-message');
   const okButton = customAlert.querySelector('button'); // OKボタンを取得
@@ -71,7 +71,7 @@ window.startUpAPI.on('nousemongodb', async (event, ...args) => {
 });});
 
 window.startUpAPI.on('connecttomongodb', async (event, message) => {
-  const messageBoxOptions={message:'Your MongoDB Atlas is connected right.'};
+  const messageBoxOptions= {message:'Your MongoDB Atlas is connected right. The bellow [OK]-button-click is to lead you ahead.'};
   const customAlert = document.getElementById('custom-alert');
   const alertMessage = document.getElementById('alert-message');
   const okButton = customAlert.querySelector('button'); // OKボタンを取得

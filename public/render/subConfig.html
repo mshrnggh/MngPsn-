@@ -9,7 +9,6 @@
 
 <body>
     <div class="mongo-config-set">Setting MongoDB Altlas configuration</div>
-    <br />
     <div class="config">
         <div id="mongodb-conf">
             <label for="mongodb-uri">Please enter the MongoDB Atlas URI if you haven’t yet.  If you have, just click SUBMIT button without any input.</br>Example: mongodb+srv://[username:password@][host for your MongoDB
@@ -20,6 +19,10 @@
         <form class="conf-submit">
             <button type="submit">SUBMIT</button>
         </form>
+    </div>
+    <div id="custom-alert">
+        <div id="alert-message"></div>
+        <button class="dialog" type="button">OK</button>
     </div>
     <link rel="stylesheet" href="../style/subConfig.css">
     <script type="module" src="../render/subConfig.mjs"></script>
