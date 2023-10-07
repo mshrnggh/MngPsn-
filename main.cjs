@@ -19,24 +19,20 @@ app.whenReady().then(() => {startUp();});
 ipcMain.removeAllListeners('startup-config-data');
 ipcMain.on('startup-config-data', async (event, data) => {
   console.log('startup-config-data event maincjs with data ', data);
-  const a = data.mongodbUriValue||'';
-  const b = data.wm;
-  const c = data.ol;
+  const a=data.mongodbUriValue||''; const b=data.wm; const c=data.ol;
   const {getStartupWindow} = require(path.join(__dirname, './public/mainProcess/startup.cjs'));
   let startupWindow = getStartupWindow();
   // startupWindowが定義されるまで待つ
   new Promise((resolve) => {if (startupWindow) { resolve();
-    } else {app.on('browser-window-created', (event, window) => {console.log('window ', window);
-        if (window === startupWindow) {console.log('startupWindow ', startupWindow, 'window ', window);
-          resolve();
-        }
-      });}
-  });
+    } else {app.on('browser-window-created', (event, window) => {
+        if (window === startupWindow) {resolve();}
+  });};});
   await app.whenReady();
   const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
   await startServer(a,b,c);
+  if(startupWindow) { startupWindow.close();startupWindow = null;
+    console.log('startupWindow closed', startupWindow);}; 
   await new Promise((resolve) => {setTimeout(() => {resolve();}, 1000);});
-  if(startupWindow) {startupWindow.close();startupWindow = null;}; 
 });
 ipcMain.removeAllListeners('useMongoDB');
 ipcMain.on('useMongoDB', async (event) => {
@@ -47,22 +43,27 @@ ipcMain.on('useMongoDB', async (event) => {
 });
 ipcMain.removeAllListeners('sub-config-data');
 ipcMain.on('sub-config-data', async (event, data) => {
-  const a = data.mongodbUriValue || '';
-  const b = data.wm;
-  const c = data.ol;
-  const {getSubConfigWindow} = require(path.join(__dirname, './public/mainProcess/startup.cjs'));
-  let subConfigWindow = await getSubConfigWindow();
+  console.log('sub-config-data event maincjs with data ', data);
+  const a=data.mongodbUriValue||'';const b=data.wm;const c=data.ol;
+  const {getSubConfigWindow}=require(path.join(__dirname, './public/mainProcess/startup.cjs'));
+  let subConfigWindow=await getSubConfigWindow();
+  const {getStartupWindow}=require(path.join(__dirname, './public/mainProcess/startup.cjs'));
+  let startupWindow=getStartupWindow();
+  if(!startupWindow.isDestroyed()){startupWindow.close();startupWindow=null;};
+  //上は、if(startupWindow)分岐だけでは、undefined以外であっては、nullでもtrueを返すことに注意。
+    
   // subConfigWindowが定義されるまで待つ
   await new Promise((resolve) => {
     if (subConfigWindow) {resolve();} else {
       app.on('browser-window-created', (event, window) => {
         if (window === subConfigWindow) {resolve();}
       });}
-  });
-  if (subConfigWindow) {await subConfigWindow.close();subConfigWindow = null;}
+  }).catch((error) => {console.error(error);});
   await app.whenReady();
   const {startServer} = require(path.join(__dirname, './public/mainProcess/server.cjs'));
   await startServer(a, b, c);
+  if(subConfigWindow) {subConfigWindow.close();subConfigWindow = null;
+    console.log('subConfigWindow closed', subConfigWindow);}; 
 });
 app.on('window-all-closed', () => {if (process.platform !== 'darwin') {app.quit();}
 });

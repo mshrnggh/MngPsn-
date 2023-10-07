@@ -5,7 +5,7 @@ const {updateDataIPC}=require('./patchIPC.cjs');
 const path = require("path");
 const {deleteDataIPC, exchangeDataIPC }=require('./delchanIPC.cjs');
 const {startUp, subConfig} = require(path.join(__dirname, './startup.cjs'));
-const {getStartupWindow}=require('./startup.cjs');
+const {getStartupWindow,getSubConfigWindow}=require('./startup.cjs'); 
 const {ipcMain}=require("electron");const fs=require("fs");
 const url=require('url');const dotenv=require("dotenv");dotenv.config();
 const express=require("express");const appExpr=express();appExpr.use(express.json());
@@ -14,15 +14,23 @@ let mongodbUriValue="";let wm=false;let ol=false;
 
 async function startServer(mongodbUriValue, wm, ol){ 
   if (wm===true){
-    if(!mongodbUriValue){
-    const startupWindow = getStartupWindow();
-    await startupWindow.webContents.send('mongodb-uri-empty'); 
-    await new Promise ((resolve) => {
-      ipcMain.removeAllListeners('mongodb-uri-empty-reply');
-      ipcMain.on('mongodb-uri-empty-reply', () => { resolve(); });});
-    await startUp();     
-    } else { await useMongoDB(mongodbUriValue, ol, wm);}      
-
+    if (mongodbUriValue) {await useMongoDB(mongodbUriValue, ol, wm);
+    } else if (!mongodbUriValue) {
+      const startupWindow=getStartupWindow();const subConfigWindow=getSubConfigWindow();
+      if(subConfigWindow!==null && !startupWindow.isDestroyed()) {
+        startupWindow.close();startupWindow = null;
+      }else if(subConfigWindow!==null && startupWindow.isDestroyed){
+        await ipcMain.removeAllListeners('mongodb-uri-empty');
+        await subConfigWindow.webContents.send('mongodb-uri-empty'); 
+        await new Promise ((resolve) => {
+          ipcMain.removeAllListeners('mongodb-uri-empty-reply');
+      ipcMain.on('mongodb-uri-empty-reply',async()=>{await subConfig(); resolve(); });});
+      }else if(subConfigWindow === null && !startupWindow.isDestroyed()){
+        await startupWindow.webContents.send('mongodb-uri-empty'); 
+        await new Promise ((resolve) => {
+          ipcMain.removeAllListeners('mongodb-uri-empty-reply');
+      ipcMain.on('mongodb-uri-empty-reply', async()=>{await startUp();resolve();});});};};               
+    
   } else if (ol===true) { 
     const startupWindow = getStartupWindow();
     await startupWindow.webContents.send('nousemongodb'); 
@@ -30,16 +38,19 @@ async function startServer(mongodbUriValue, wm, ol){
       ipcMain.removeAllListeners('nousemongodb-reply');
       ipcMain.on('nousemongodb-reply', () => { resolve(); });
     });
-    await createBoard(ol,wm);};
-  };
+  await createBoard(ol,wm);};
+};
   
-  async function useMongoDB(mongodbUriValue, ol, wm){ 
-    //return new Promise(async (resolve) => {.then/catch}では、mongo.connect自体が
-    //エラー時にエラーをスローしてしまい、.catchは実行されない。Promise化しない方がエラー時にはcatch{}が実行される。
-    //これは、try{}のなかmongoose.connectを利用しているからである。
-    try {  await mongoose.connect(mongodbUriValue, {
-      useNewUrlParser: true, useUnifiedTopology: true })
-      const startupWindow = getStartupWindow();
+async function useMongoDB(mongodbUriValue, ol, wm){ 
+  //return new Promise(async (resolve) => {.then/catch}では、mongo.connect自体が
+  //エラー時にエラーをスローしてしまい、.catchは実行されない。Promise化しても、.then/catchを使用しない
+  //方がエラー時にはcatch{}が実行される。これはmongoose.connectは基本的に非同期で、
+  //.then.catchが利用できるが、今回は利用し無い方が良い。
+  let connection;
+  const startupWindow = getStartupWindow();const subConfigWindow=getSubConfigWindow();
+  if(subConfigWindow===null && !startupWindow.isDestroyed()) {
+    try { await mongoose.connect(mongodbUriValue, {
+        useNewUrlParser: true, useUnifiedTopology: true });
       await startupWindow.webContents.send('connecttomongodb'); 
       await new Promise ((resolve) => {
         ipcMain.removeAllListeners('connecttomongodb-reply');
@@ -52,10 +63,30 @@ async function startServer(mongodbUriValue, wm, ol){
       await new Promise( (resolve) => {
         ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');
         ipcMain.on('mongodb-uri-incorrect-reply', async () => {
-          await resolve();});
+          await closeMongoDB(connection); await resolve();});
+      }); await startUp(); //throw error;
+    };
+
+  }else if(subConfigWindow!==null && startupWindow.isDestroyed()) {
+    try { await mongoose.connect(mongodbUriValue, {
+        useNewUrlParser: true, useUnifiedTopology: true });
+      await subConfigWindow.webContents.send('connecttomongodb'); 
+      await new Promise ((resolve) => {
+        ipcMain.removeAllListeners('connecttomongodb-reply');
+        ipcMain.on('connecttomongodb-reply', async () => { 
+          await createBoard(ol,wm); await resolve(); });
+      }); 
+    } catch (error) {          
+      await subConfigWindow.webContents.send('mongodb-uri-incorrect');
+      await new Promise( (resolve) => {
+        ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');
+        ipcMain.on('mongodb-uri-incorrect-reply', async () => {
+          await closeMongoDB(connection); await resolve();});
       }); await startUp(); //throw error;
     };
   };
+};
+async function closeMongoDB(connection){if(connection){await connection.close();};};
 
 async function createBoard(ol,wm) {
   const {BrowserWindow,app}=require("electron");let Thread='';
@@ -157,7 +188,6 @@ async function createBoard(ol,wm) {
       await updateDataIPC(renewData,ol,wm); 
       const renewAllData = await getAllThreadsIPC(ol, wm);
       if( typeof renewAllData !== JSON ) {const serializedData = JSON.parse(JSON.stringify(renewAllData));
-        console.log('serializedData2 servercjs ', serializedData);
         event.reply('update-DBdata-reply', serializedData);}
       else if (typeof renewAllData === JSON){ const serializedData = JSON.parse(renewAllData);
         event.reply('update-DBdata-reply', serializedData);};
@@ -178,10 +208,8 @@ async function createBoard(ol,wm) {
     ipcMain.removeAllListeners('delete-thread-reply');
     ipcMain.on('delete-thread', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
-      console.log('data2 at delete-thread servercjs ', ol,wm); 
       const renewAllData = await deleteDataIPC(renewData,ol,wm); 
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
-      console.log('serializedData2 servercjs ', serializedData);
       event.reply('delete-thread-reply', serializedData);
     });
   } else {
@@ -197,10 +225,8 @@ async function createBoard(ol,wm) {
     ipcMain.removeAllListeners('thread-exchange-reply');
     ipcMain.on('thread-exchange', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
-      console.log('data2 at thread-exchange servercjs ', ol,wm); 
       const renewAllData = await exchangeDataIPC(renewData,ol,wm); 
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
-      console.log('serializedData2 servercjs ', serializedData);
       event.reply('thread-exchange-reply', serializedData);
     });
   } else {

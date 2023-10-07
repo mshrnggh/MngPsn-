@@ -1,4 +1,4 @@
-const { contextBridge, ipcRenderer, remote } = require('electron');
+const { contextBridge, ipcRenderer } = require('electron');
 contextBridge.exposeInMainWorld('startUpAPI', {
   sendConfig: (configData) => {
     return new Promise((resolve, reject) => {
@@ -13,11 +13,6 @@ contextBridge.exposeInMainWorld('startUpAPI', {
       await ipcRenderer.removeAllListeners(channel);
       await ipcRenderer.on(channel, (event, ...args) => {callback(...args);});
   };},
-  windowClose: () => {const window = remote.getCurrentWindow();window.close();},  
-  removeChannel: async (channel) => {
-    await ipcRenderer.removeAllListeners(channel);  
-    console.log(`${channel} is removed`);
-  },
   send: async (channel, ...args) => {
     await ipcRenderer.removeAllListeners(channel);
     await ipcRenderer.send(channel, ...args);
