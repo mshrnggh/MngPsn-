@@ -12,80 +12,77 @@ const express=require("express");const appExpr=express();appExpr.use(express.jso
 const mongoose=require("mongoose");let boardWindow;
 let mongodbUriValue="";let wm=false;let ol=false;
 
-async function startServer(mongodbUriValue, wm, ol){ 
-  if (wm===true){
-    if (mongodbUriValue) {await useMongoDB(mongodbUriValue, ol, wm);
-    } else if (!mongodbUriValue) {
-      const startupWindow=getStartupWindow();const subConfigWindow=getSubConfigWindow();
-      if(subConfigWindow!==null && !startupWindow.isDestroyed()) {
-        startupWindow.close();startupWindow = null;
-      }else if(subConfigWindow!==null && startupWindow.isDestroyed){
-        await ipcMain.removeAllListeners('mongodb-uri-empty');
-        await subConfigWindow.webContents.send('mongodb-uri-empty'); 
-        await new Promise ((resolve) => {
-          ipcMain.removeAllListeners('mongodb-uri-empty-reply');
-      ipcMain.on('mongodb-uri-empty-reply',async()=>{await subConfig(); resolve(); });});
-      }else if(subConfigWindow === null && !startupWindow.isDestroyed()){
-        await startupWindow.webContents.send('mongodb-uri-empty'); 
-        await new Promise ((resolve) => {
-          ipcMain.removeAllListeners('mongodb-uri-empty-reply');
-      ipcMain.on('mongodb-uri-empty-reply', async()=>{await startUp();resolve();});});};};               
-    
-  } else if (ol===true) { 
-    const startupWindow = getStartupWindow();
-    await startupWindow.webContents.send('nousemongodb'); 
-    await new Promise ((resolve) => {
-      ipcMain.removeAllListeners('nousemongodb-reply');
-      ipcMain.on('nousemongodb-reply', () => { resolve(); });
-    });
-  await createBoard(ol,wm);};
-};
+async function startServer(mongodbUriValue,wm,ol){
+if(wm===true) {
+  let startupWindow=getStartupWindow();let subConfigWindow=getSubConfigWindow();
+  if(mongodbUriValue){await useMongoDB(mongodbUriValue, ol, wm);
+
+  }else if(!mongodbUriValue){
+    if(subConfigWindow !== null && !subConfigWindow.isDestroyed() && startupWindow.isDestroyed){
+      await ipcMain.removeAllListeners('mongodb-uri-empty');
+      await subConfigWindow.webContents.send('mongodb-uri-empty');
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-empty-reply');
+        ipcMain.on('mongodb-uri-empty-reply',async()=>{await subConfig();resolve();});});
+ 
+    }else if(subConfigWindow === null && !startupWindow.isDestroyed()){
+      await startupWindow.webContents.send('mongodb-uri-empty');
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-empty-reply');
+      ipcMain.on('mongodb-uri-empty-reply', async()=>{await startUp();resolve();});});
+
+    }else if(subConfigWindow.isDestroyed() && !startupWindow.isDestroyed()){
+      await startupWindow.webContents.send('mongodb-uri-empty');
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-empty-reply');
+        ipcMain.on('mongodb-uri-empty-reply', async()=>{await startUp();resolve();});});
+    };
+  };
+
+}else if(ol===true){let startupWindow=getStartupWindow();
+  await startupWindow.webContents.send('nousemongodb'); 
+  await new Promise((resolve)=>{ipcMain.removeAllListeners('nousemongodb-reply');
+    ipcMain.on('nousemongodb-reply',()=>{resolve();});});
+  await createBoard(ol,wm);};};
   
 async function useMongoDB(mongodbUriValue, ol, wm){ 
   //return new Promise(async (resolve) => {.then/catch}では、mongo.connect自体が
   //エラー時にエラーをスローしてしまい、.catchは実行されない。Promise化しても、.then/catchを使用しない
   //方がエラー時にはcatch{}が実行される。これはmongoose.connectは基本的に非同期で、
   //.then.catchが利用できるが、今回は利用し無い方が良い。
-  let connection;
-  const startupWindow = getStartupWindow();const subConfigWindow=getSubConfigWindow();
-  if(subConfigWindow===null && !startupWindow.isDestroyed()) {
-    try { await mongoose.connect(mongodbUriValue, {
-        useNewUrlParser: true, useUnifiedTopology: true });
-      await startupWindow.webContents.send('connecttomongodb'); 
-      await new Promise ((resolve) => {
-        ipcMain.removeAllListeners('connecttomongodb-reply');
-        ipcMain.on('connecttomongodb-reply', async () => { 
-          await createBoard(ol,wm); await resolve(); });
-      }); 
-    } catch (error) {          
-      const startupWindow = getStartupWindow();
+  let connection; let startupWindow = getStartupWindow();let subConfigWindow=getSubConfigWindow();		
+    if(subConfigWindow===null&&!startupWindow.isDestroyed()){				
+      try{await mongoose.connect(mongodbUriValue,{useNewUrlParser:true,useUnifiedTopology:true});
+      await startupWindow.webContents.send('connecttomongodb'); 		
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('connecttomongodb-reply');
+        ipcMain.on('connecttomongodb-reply',async()=>{ 		
+          await createBoard(ol,wm);await resolve();});});
+      }catch(error){let startupWindow=getStartupWindow();		
       await startupWindow.webContents.send('mongodb-uri-incorrect');
-      await new Promise( (resolve) => {
-        ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');
-        ipcMain.on('mongodb-uri-incorrect-reply', async () => {
-          await closeMongoDB(connection); await resolve();});
-      }); await startUp(); //throw error;
-    };
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');		
+        ipcMain.on('mongodb-uri-incorrect-reply',async()=>{await closeMongoDB(connection);
+           await resolve();});});await startUp();}		
+		
+    } else if(subConfigWindow!==null&&subConfigWindow.isDestroyed()&&!startupWindow.isDestroyed()){		
+      try{await mongoose.connect(mongodbUriValue,{useNewUrlParser:true,useUnifiedTopology:true});
+      await startupWindow.webContents.send('connecttomongodb'); 		
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('connecttomongodb-reply');
+      ipcMain.on('connecttomongodb-reply',async()=>{ 		
+        await createBoard(ol,wm);await resolve();});});
+      }catch(error){let startupWindow=getStartupWindow();		
+        await startupWindow.webContents.send('mongodb-uri-incorrect');
+        await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');		
+          ipcMain.on('mongodb-uri-incorrect-reply',async()=>{await closeMongoDB(connection); 
+            await resolve();});});await startUp();};		
+		
+    } else if(subConfigWindow!==null&&!subConfigWindow.isDestroyed()&&startupWindow.isDestroyed()){		 	
+      try{await mongoose.connect(mongodbUriValue,{useNewUrlParser:true,useUnifiedTopology:true});		
+      await subConfigWindow.webContents.send('connecttomongodb');
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('connecttomongodb-reply');		
+        ipcMain.on('connecttomongodb-reply',async()=>{await createBoard(ol,wm);await resolve();});});		
+      }catch(error){await subConfigWindow.webContents.send('mongodb-uri-incorrect');
+      await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');		
+        ipcMain.on('mongodb-uri-incorrect-reply',async()=>{
+          await closeMongoDB(connection);await resolve();});});await startUp();};};
+};		
 
-  }else if(subConfigWindow!==null && startupWindow.isDestroyed()) {
-    try { await mongoose.connect(mongodbUriValue, {
-        useNewUrlParser: true, useUnifiedTopology: true });
-      await subConfigWindow.webContents.send('connecttomongodb'); 
-      await new Promise ((resolve) => {
-        ipcMain.removeAllListeners('connecttomongodb-reply');
-        ipcMain.on('connecttomongodb-reply', async () => { 
-          await createBoard(ol,wm); await resolve(); });
-      }); 
-    } catch (error) {          
-      await subConfigWindow.webContents.send('mongodb-uri-incorrect');
-      await new Promise( (resolve) => {
-        ipcMain.removeAllListeners('mongodb-uri-incorrect-reply');
-        ipcMain.on('mongodb-uri-incorrect-reply', async () => {
-          await closeMongoDB(connection); await resolve();});
-      }); await startUp(); //throw error;
-    };
-  };
-};
 async function closeMongoDB(connection){if(connection){await connection.close();};};
 
 async function createBoard(ol,wm) {
