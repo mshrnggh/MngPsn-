@@ -1,8 +1,14 @@
 <<<<<<< HEAD
 <<<<<<< HEAD
+<<<<<<< HEAD
 2023/10/10-14:06:37.882 30e0 Reusing MANIFEST F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/MANIFEST-000001
 2023/10/10-14:06:37.883 30e0 Recovering log #14
 2023/10/10-14:06:37.883 30e0 Reusing old log F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/000014.log 
+=======
+2023/10/07-23:17:55.520 54d0 Reusing MANIFEST F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/MANIFEST-000001
+2023/10/07-23:17:55.521 54d0 Recovering log #14
+2023/10/07-23:17:55.521 54d0 Reusing old log F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/000014.log 
+>>>>>>> 2dd5df73c684366339ea6f8442fffad74c80637a
 =======
 2023/10/07-23:17:55.520 54d0 Reusing MANIFEST F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/MANIFEST-000001
 2023/10/07-23:17:55.521 54d0 Recovering log #14
