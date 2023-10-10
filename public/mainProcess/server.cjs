@@ -3,7 +3,6 @@ const {getAllThreadsIPC}=require('./getIPC.cjs');
 const {getResearchIPC}=require('./searchIPC.cjs');
 const {updateDataIPC}=require('./patchIPC.cjs');
 const path = require("path");
-const path = require("path");
 const {deleteDataIPC, exchangeDataIPC }=require('./delchanIPC.cjs');
 const {startUp, subConfig} = require(path.join(__dirname, './startup.cjs'));
 const {getStartupWindow,getSubConfigWindow}=require('./startup.cjs'); 
