@@ -21,7 +21,7 @@ if(wm===true) {
   if(mongodbUriValue){await useMongoDB(mongodbUriValue, ol, wm);
 
   }else if(!mongodbUriValue){
-    if(subConfigWindow !== null && !subConfigWindow.isDestroyed() && startupWindow.isDestroyed){
+    if(subConfigWindow !== null && !subConfigWindow.isDestroyed() && startupWindow.isDestroyed()){
       await ipcMain.removeAllListeners('mongodb-uri-empty');
       await subConfigWindow.webContents.send('mongodb-uri-empty');
       await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-empty-reply');
