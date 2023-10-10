@@ -22,7 +22,7 @@ if(wm===true) {
       await ipcMain.removeAllListeners('mongodb-uri-empty');
       await subConfigWindow.webContents.send('mongodb-uri-empty');
       await new Promise((resolve)=>{ipcMain.removeAllListeners('mongodb-uri-empty-reply');
-        ipcMain.on('mongodb-uri-empty-reply',async()=>{await subConfig();resolve();});});
+        ipcMain.on('mongodb-uri-empty-reply',async()=>{await startUp();resolve();});});
  
     }else if(subConfigWindow === null && !startupWindow.isDestroyed()){
       await startupWindow.webContents.send('mongodb-uri-empty');

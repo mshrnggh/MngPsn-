@@ -10,9 +10,9 @@ async function getAllThreadsIPC(ol, wm) {return new Promise((resolve,reject)=>  
         data = JSON.parse(localData);
         const mongoData = await Thread.find({}, { _id: 1, title: 1, content: 1, straged: 1 });
         const mongoDataCount = await Thread.countDocuments();
-        const mongoDataLimit = Math.min(mongoDataCount, 28);
+        const mongoDataLimit = Math.min(mongoDataCount, 30);
         mongoData.splice(mongoDataLimit); 
-        data = [...mongoData, ...data]; data = data.slice(0, 28);
+        data = [...mongoData, ...data]; data = data.slice(0, 30);
         allThreads = data.map((thread) => {
             const id = thread.id || thread._id && thread._id.toString();
             const title = thread.title || thread['title:'] || '';
@@ -24,7 +24,7 @@ async function getAllThreadsIPC(ol, wm) {return new Promise((resolve,reject)=>  
      } else if (ol === true) { (async ()=> {
        const lclDataPath = path.join(__dirname, '../localData.json');
        const localData = await fs.promises.readFile(lclDataPath,'utf-8');
-       data = JSON.parse(localData); 
+       data = JSON.parse(localData); data = data.slice(0,30);
        allThreads = await data.map((thread) => {
          const id = thread.id || thread._id && thread._id.toString();
          const title = thread.title||thread['title:']||'';

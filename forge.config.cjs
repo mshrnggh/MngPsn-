@@ -5,7 +5,8 @@ module.exports = {
     icon: "path/to/icon.ico",
     appBundleId: "com.example.my_application",
     win32metadata: {
-      CompanyName: "My Company",
+      CompanyName: "",
+      Auther: "Masahiro Noguchi",
       ProductName: "My bulletine board Application",
       FileDescription: "My Application Description",
       OriginalFilename: "my_application.exe",
@@ -13,18 +14,13 @@ module.exports = {
     }
   },
   makers: [   
-    {
-      name: "@electron-forge/maker-msi",
-      config: {
-        name: "my_application",
-        icon: "path/to/icon.ico",
-        setupIcon: "path/to/setup-icon.ico",
-        loadingGif: "path/to/loading.gif"
-      }
-    },
      {
       name: "@electron-forge/maker-zip",
       platforms: ["win32"]
-    }
+     },      
+     {
+      name: "@electron-forge/maker-squirrel",
+      platforms: ["win32"]
+     }  
   ]
 };
