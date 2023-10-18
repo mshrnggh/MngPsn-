@@ -1,12 +1,27 @@
 let ol = false; let wm = false; let data = []; 
-import { dragStart, dragEnd, dragOver, dragLeave, drop } from "./delchang.mjs";
+import { dragStart, dragEnd} from "./delchang.mjs";
 const getAllThreAgain = document.querySelector('#getAllThreAgain');
 getAllThreAgain.addEventListener('click',async()=>{await showBoardList()});
+
+document.addEventListener('DOMContentLoaded', async () => {
+  await window.postAPI.removeChannel('get-lclStrg');
+  await window.postAPI.receive('get-lclStrg', async(event)=>{
+    const lclStrg = await getLocalStorage();
+    await window.postAPI.send('get-lclStrg-reply',lclStrg);
+  });
+});
+
+export async function getLocalStorage(){
+  const count = await localStorage.length; const allStorage = [];
+  for (let i = 0; i < count; i++) {
+    const key = `key${i}`; const item = localStorage.getItem(key);
+     if (item !== null) { allStorage.push(JSON.parse(item)); }; 
+}; return allStorage;};
 
 export async function showBoardList() {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata');
-  await window.postAPI.receive('get-DBdata', async(...args)=>{[data,ol,wm]=args;
+  await window.postAPI.receive('get-DBdata', async(event, ...args)=>{[data,ol,wm]=args;
   if (typeof data === "json") {data = JSON.parse(data);}
   else {data = JSON.parse(JSON.stringify(data));};
   const allThreList = await createBoardList(data);
@@ -57,5 +72,4 @@ export async function createBoardColumns(allThreads) {
   const boardColumn = document.querySelector('.board-column'); 
   const formSection = document.querySelector('.form-section');
   boardColumn.appendChild(formSection);threadSection.appendChild(boardColumn);   
-  console.log('threadSection final', threadSection);
 };

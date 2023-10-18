@@ -52,6 +52,4 @@ function subConfig() {
       slashes: true
     }));
 };
-
-module.exports={startUp, subConfig,  getStartupWindow: () => startupWindow,
-  getSubConfigWindow: () => subConfigWindow}
+module.exports={startUp,subConfig, getStartupWindow:()=>startupWindow,getSubConfigWindow:()=>subConfigWindow}

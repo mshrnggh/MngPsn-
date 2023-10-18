@@ -15,13 +15,6 @@ contextBridge.exposeInMainWorld('startUpAPI', {
   };},
   send: async (channel, ...args) => {
     await ipcRenderer.removeAllListeners(channel);
-    await ipcRenderer.send(channel, ...args);
-    console.log(`${channel} is sent with data`, args);
-  }, 
-  receive: async (channel, func) => { 
-    await ipcRenderer.removeAllListeners(channel);
-    await ipcRenderer.on(channel, async (event, ...args) => {
-      console.log(`${channel} is on with args`, args); await func(...args);
-    });
-  }
+    await ipcRenderer.send(channel, ...args); 
+  } 
 });

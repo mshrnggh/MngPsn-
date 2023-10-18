@@ -5,7 +5,7 @@ let ol = false; let wm = false;let data=[];
 document.addEventListener('DOMContentLoaded', async () => {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata');
-  await window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args;
+  await window.postAPI.receive('get-DBdata',async(event, ...args)=>{[data,ol,wm]=args;
     if (ol === true) {await removeMongoButton();await addMongoButton('UseMongo');} 
     const useMongo = document.getElementById('to_mongoConfig');
     if (useMongo!==null){

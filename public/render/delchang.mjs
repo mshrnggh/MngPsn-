@@ -1,14 +1,62 @@
-import { createBoardList, createBoardColumns } from "./get.mjs";
-document.addEventListener('DOMContentLoaded', async()=>{
+import { createBoardList, createBoardColumns, getLocalStorage } from "./get.mjs";
+document.addEventListener('DOMContentLoaded', ()=>{
   const deleteSection = document.querySelector('.delete-section');
   const strageExchange = document.querySelector('.strage-exchange');
-  await deleteSection.addEventListener('dragover', dragOver);
-  await deleteSection.addEventListener('dragleave', dragLeave);
-  await deleteSection.addEventListener('drop', drop);
-  await strageExchange.addEventListener('dragover', dragOver);
-  await strageExchange.addEventListener('dragleave', dragLeave);
-  await strageExchange.addEventListener('drop', drop); 
-});
+  deleteSection.addEventListener('dragover', dragOver);
+  deleteSection.addEventListener('dragleave', dragLeave);
+  deleteSection.addEventListener('drop', drop);
+  strageExchange.addEventListener('dragover', dragOver);
+  strageExchange.addEventListener('dragleave', dragLeave);
+  strageExchange.addEventListener('drop', drop); 
+});//document.addEventListener('DOMContentLoaded', は非同期ではない。DOM読込完了を待つ
+//一方でwindow.addEventListener('DOMContentloaded', は非同期でり、DOM読込完了を待たない
+  
+async function deleteStrg() {
+  return new Promise(async(resolve,reject)=>{
+      const lclStrg = await getLocalStorage();
+      await window.postAPI.removeChannel('delete-lclStrg');
+      await window.postAPI.send('delete-lclStrg', lclStrg);
+      await window.postAPI.receive('delete-lclStrg',async(event, ...args)=>{
+        const trgtKy = args[0]; const targetKey = `key${trgtKy}`;        
+        await localStorage.removeItem(targetKey);
+        
+        const targetKeys = Object.keys(localStorage).filter(key => {
+          const num = parseInt(key.replace('key', ''));
+          return !isNaN(num) && num > trgtKy;
+        }); 
+
+        for (const key of targetKeys) {
+          const num = parseInt(key.replace('key', '')); const newKey = `key${num - 1}`;
+          const value = localStorage.getItem(key); localStorage.setItem(newKey, value);
+          localStorage.removeItem(key);}
+});resolve();});};
+
+async function exchStrg () {
+  return new Promise(async(resolve,reject)=>{    
+    const lclStrg = await getLocalStorage();
+    await window.postAPI.removeChannel('exch-lclStrg');
+    await window.postAPI.send('exch-lclStrg', lclStrg);
+    await window.postAPI.receive('exch-lclStrg',async(event, ...args)=>{ 
+      //preload fileのreceiveに注意事項あり。
+      if (args.length > 0) { const trgtKy = args[0]; const targetKey = `key${trgtKy}`;
+        const allKeys = await Object.keys(localStorage); // localStorageに格納されているすべてのキーを取得する
+        let max = await allKeys.reduce((max, key) => { 
+          const num = parseInt(key.replace('key', ''), 10); //キーから数値を取得する。10は10進法を意味する。
+          return num > max ? num : max;}, 0);  // 最大値を更新する// 
+          const maxKey = `key${max+1}`; // 数値が一番大きいキーより１つ大きい数値を取得する
+          const selectedData = await localStorage.getItem(targetKey);
+          if(selectedData) { const parsedData = JSON.parse(selectedData);
+            await localStorage.setItem(maxKey,JSON.stringify(parsedData));
+            await localStorage.removeItem(targetKey);
+            const targetKeys = Object.keys(localStorage).filter(key => {
+              const num=parseInt(key.replace('key','')); return !isNaN(num) && num > trgtKy;
+            }); 
+            for (const key of targetKeys) {
+              const num = parseInt(key.replace('key','')); const newKey = `key${num - 1}`;
+              const value = localStorage.getItem(key); localStorage.setItem(newKey, value);
+            localStorage.removeItem(key);}
+          };  
+      };});resolve();});};
 
 export async function dragStart(event) {   
    await event.dataTransfer.setData('text/plain', JSON.stringify({
@@ -34,14 +82,14 @@ export async function drop(event) {
     const threadId = JSON.parse(threadElement).id;
     const straged = JSON.parse(threadElement).straged;
     const deleteData = {id: threadId, straged: straged};
-    console.log('deleteData at drop ', deleteData);
     await window.postAPI.removeChannel('get-DBdata');
     await window.postAPI.send('get-DBdata');
-    window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args;
+    await window.postAPI.receive('get-DBdata',async(event, ...args)=>{[data,ol,wm]=args;
       await window.postAPI.removeChannel('delete-thread');
       await window.postAPI.send('delete-thread', deleteData,ol,wm);
+      await deleteStrg();
       await window.postAPI.removeChannel('delete-thread-reply');
-      await window.postAPI.receive('delete-thread-reply',async(...args)=>{
+      await window.postAPI.receive('delete-thread-reply',async(event, ...args)=>{
         const newAllData=args[0];        
         const allThreList = await createBoardList(newAllData);
         const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
@@ -55,14 +103,14 @@ export async function drop(event) {
      const content = JSON.parse(threadElement).content;
      const straged = JSON.parse(threadElement).straged;
      const exchangeData = {id,title,content,straged};
-     console.log('exchangeData on exchange', exchangeData);
      await window.postAPI.removeChannel('get-DBdata');
      await window.postAPI.send('get-DBdata');
-     window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args;
+     await window.postAPI.receive('get-DBdata',async(event, ...args)=>{[data,ol,wm]=args;
        await window.postAPI.removeChannel('thread-exchange');
        await window.postAPI.send('thread-exchange', exchangeData,ol,wm);
+       await exchStrg();
        await window.postAPI.removeChannel('thread-exchange-reply');
-       await window.postAPI.receive('thread-exchange-reply', async(...args)=>{
+       await window.postAPI.receive('thread-exchange-reply', async(event, ...args)=>{
        const newAllData=args[0];
        const allThreList = await createBoardList(newAllData);
        const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');

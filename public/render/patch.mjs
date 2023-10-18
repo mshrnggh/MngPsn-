@@ -20,10 +20,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const modifyButton = document.querySelector('#modify');
   modifyButton.addEventListener('click', (event) => {
    handleClick(event, formSection);});
-});
-            
+});            
 async function handleClick(event,formSection) { event.preventDefault(); 
-  let data, ol, wm;  
+  let renewData, data, ol, wm;  
   const inputTitle = document.querySelector('#inputTitle');
   const inputContent = document.querySelector('#inputContent');
   let lockedThread;
@@ -35,15 +34,20 @@ async function handleClick(event,formSection) { event.preventDefault();
   const straged = lockedThread.dataset.straged;
   const newTitle = inputTitle.value.trim();
   const newContent = inputContent.value.trim();
-  const renewData = { title:newTitle, content:newContent, straged, id };
+  renewData = { title:newTitle, content:newContent, straged, id }; 
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i); const value = localStorage.getItem(key);
+    if(renewData.id===JSON.parse(value).id){localStorage.setItem(key, JSON.stringify(renewData));
+    break;};
+  };
   if (lockedThread) {
     await window.postAPI.removeChannel('get-DBdata');
     await window.postAPI.send('get-DBdata');
-    window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args;
+    window.postAPI.receive('get-DBdata',async(event, ...args)=> { [data,ol,wm]=args;
       await window.postAPI.removeChannel('update-DBdata');
       await window.postAPI.send('update-DBdata',renewData,ol,wm);
       await window.postAPI.removeChannel('update-DBdata-reply');
-      await window.postAPI.receive('update-DBdata-reply', async (...args) => {
+      await window.postAPI.receive('update-DBdata-reply', async (event, ...args) => {
         const newAllData=args[0];
         if (typeof newAllData === "json") {data = JSON.parse(newAllData);}
         else {data = JSON.parse(JSON.stringify(newAllData));}
@@ -52,7 +56,6 @@ async function handleClick(event,formSection) { event.preventDefault();
         await flipModify(event,formSection); await createBoardColumns(allThreads);      
   });});};
 };
-    
 async function flipModify(event, formSection) {
   if(!event||event.target.nodeName!=='BUTTON') {return;}
   if(!formSection){console.error('formSection not found');return;};
@@ -70,10 +73,8 @@ async function flipModify(event, formSection) {
     inputTitle.value = ''; inputContent.value = '';
     event.target.removeEventListener('click', handleClick);
   };
-};
-    
+};  
 function displayContent(singleThread) {
-  console.log('dipslayContent is called!', singleThread);
   if (!singleThread) return;
   const title = singleThread.querySelector('.thread-title').textContent;
   const content = singleThread.dataset.content;
@@ -81,11 +82,8 @@ function displayContent(singleThread) {
   const inputContent = document.querySelector('#inputContent');
   inputTitle.value = title;  inputContent.value = content;
 };
-
 function clearDisplay() {
   const inputTitle = document.querySelector('#inputTitle');
   const inputContent = document.querySelector('#inputContent');
   inputTitle.value = ""; inputContent.value = "";
 };
-
-

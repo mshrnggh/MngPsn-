@@ -7,9 +7,10 @@ contextBridge.exposeInMainWorld('postAPI', {
     await ipcRenderer.removeAllListeners('add-to-localdb');
     await ipcRenderer.removeAllListeners('add-to-localdb-reply');
     const newDataPromise = new Promise( (resolve, reject) => {
-      ipcRenderer.once('add-to-localdb-reply',(event,...args)=>{resolve(args);});});
-    await ipcRenderer.send('add-to-localdb', data);
-    const newAllThre = await newDataPromise || Promise.resolve(); 
+      ipcRenderer.send('add-to-localdb',data); 
+      ipcRenderer.on('add-to-localdb-reply', (event,...args)=>{
+        resolve(args);});});
+    const newAllThre = await newDataPromise || Promise.resolve();      
     return await newAllThre;
   },
   addToMongoDB: async (note) => {
@@ -24,18 +25,15 @@ contextBridge.exposeInMainWorld('postAPI', {
   },
   removeChannel: async (channel) => {
     await ipcRenderer.removeAllListeners(channel);  
-    console.log(`${channel} is removed`);
   },
   send: async (channel, ...args) => {
     await ipcRenderer.removeAllListeners(channel);
     await ipcRenderer.send(channel, ...args);
-    console.log(`${channel} is sent with data`, args);
   }, 
   receive: async (channel, func) => { await ipcRenderer.removeAllListeners(channel);
-    await ipcRenderer.on(channel, async (event, ...args) => {
-      console.log(`${channel} is on with args`, args); await func(...args);
-    });
-  }
+    await ipcRenderer.on(channel, async (event, ...args) => {await func(event, ...args)});
+  } // この部分は、ipcRenderer.on(channel, (event, ...args) => func(...args));と同じだが、
+  //最後の部分は、func(event,...args)にした方が一般的。
 });
 contextBridge.exposeInMainWorld('getAPI', {
   getResearchAPI: async (ol,wm,keywords) => {

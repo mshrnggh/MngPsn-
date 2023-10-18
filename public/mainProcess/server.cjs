@@ -4,7 +4,7 @@ const {getResearchIPC}=require('./searchIPC.cjs');
 const {updateDataIPC}=require('./patchIPC.cjs');
 const path = require("path");
 const {deleteDataIPC, exchangeDataIPC }=require('./delchanIPC.cjs');
-const {startUp, subConfig} = require(path.join(__dirname, './startup.cjs'));
+const {startUp} = require(path.join(__dirname, './startup.cjs'));
 const {getStartupWindow,getSubConfigWindow}=require('./startup.cjs'); 
 const {ipcMain}=require("electron");
 const url=require('url');const dotenv=require("dotenv");dotenv.config();
@@ -86,7 +86,7 @@ async function useMongoDB(mongodbUriValue, ol, wm){
 async function closeMongoDB(connection){if(connection){await connection.close();};};
 
 async function createBoard(ol,wm) {
-  const {BrowserWindow,app}=require("electron");let Thread='';
+  const {BrowserWindow,app}=require("electron");let Thread=''; let allThreads=[];
   await import('../mngSchema.mjs').then(module=>{Thread=module.Thread;});
   await app.commandLine.appendSwitch('disable-gpu');
   await app.commandLine.appendSwitch('disable-features','RendererCodeIntegrity');
@@ -100,90 +100,72 @@ async function createBoard(ol,wm) {
       preload: path.join(__dirname, '../preload/preload_board.cjs'),    
       webSecurity: true, allowRunningInsecureContent: false, 
       contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';"
-   },});
-   boardWindow.loadURL(url.format({pathname: path.join(__dirname, '../render/index.html'),
-     protocol:'file:',slashes: true
-   }));
+  },});
+  boardWindow.loadURL(url.format({pathname: path.join(__dirname, '../render/index.html'),
+    protocol:'file:',slashes: true
+  }));
    
-   if (ipcMain.eventNames().includes('get-DBdata') && ipcMain.listenerCount('get-DBdata') >= 1) {
-     ipcMain.removeAllListeners('get-DBdata');
-     ipcMain.on('get-DBdata', async (event,...args) => { 
-       let allThreads = await getAllThreadsIPC(ol, wm);
-       if (allThreads.isjson === true) {allThreads = JSON.parse((allThreads));}
-       else if (allThreads.isjson === false) {allThreads = JSON.parse(JSON.stringify(allThreads));}
-        event.reply('get-DBdata', allThreads, ol, wm);
-      }); 
-  } else { ipcMain.on('get-DBdata', async (event,...args) => {
-      const allThreads = await getAllThreadsIPC(ol, wm);
-      const serializedData = JSON.parse(JSON.stringify(allThreads));
-      event.reply('get-DBdata', serializedData, ol, wm);});
-  };
-
-  if (ipcMain.eventNames().includes('get-AllThreads') && ipcMain.listenerCount('get-AllThreads') >= 1) {
-    ipcMain.removeAllListeners('get-AllThreads');
-    ipcMain.removeAllListeners('get-AllThreads-reply');
-    ipcMain.on('get-AllThreads', async (event, ol, wm ) => { 
-      const allThreads = await getAllThreadsIPC(ol, wm);
-      const serializedData = JSON.parse(JSON.stringify(allThreads));
-      event.reply('get-AllThreads-reply', serializedData);
-    });
-  } else { ipcMain.on('get-AllThreads', async (event, ol, wm) => {
-      const allThreads = await getAllThreadsIPC(ol, wm);
-      const serializedData = JSON.parse(JSON.stringify(allThreads));
-      event.reply('get-AllThreads-reply', serializedData);});
+  if (ipcMain.eventNames().includes('get-DBdata') && ipcMain.listenerCount('get-DBdata') >= 1) {
+    ipcMain.removeAllListeners('get-DBdata');
+    ipcMain.on('get-DBdata', async (event) => { 
+      allThreads = await getAllThreadsIPC(ol, wm, boardWindow);
+      if( typeof allTheads === JSON ) {allThreads = JSON.parse((allThreads));}
+      else if( typeof allThreads !== JSON ) {allThreads = JSON.parse(JSON.stringify(allThreads));}
+        event.reply('get-DBdata', allThreads, ol, wm);}); 
+  } else { ipcMain.on('get-DBdata', async (event) => {
+    allThreads = await getAllThreadsIPC(ol, wm, boardWindow);
+    if(typeof allTheads===JSON ) {allThreads = JSON.parse((allThreads));}
+    else if(typeof allThreads !== JSON ) {allThreads=JSON.parse(JSON.stringify(allThreads));}
+    event.reply('get-DBdata', allThreads, ol, wm);});
   };
 
   if (ipcMain.eventNames().includes('add-to-localdb') && ipcMain.listenerCount('add-to-localdb') >= 1) {
     ipcMain.removeAllListeners('add-to-localdb');
-    ipcMain.removeAllListeners('add-to-localdb-reply');
     ipcMain.on('add-to-localdb', async (event, data) => { 
-      const newData = await registLocal(ol, wm, event, data); 
+      const newData = await registLocal(ol, wm, event, data, boardWindow); 
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('add-to-localdb-reply', serializedData);
     });
   } else {
     ipcMain.on('add-to-localdb', async (event, data) => {
-      const newData = await registLocal(ol, wm, event, data);
+      const newData = await registLocal(ol, wm, event, data, boardWindow);
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('add-to-localdb-reply', serializedData);});
   }; 
 
   if (ipcMain.eventNames().includes('add-to-mongodb')&&ipcMain.listenerCount('add-to-mongodb')>=1){
     ipcMain.removeAllListeners('add-to-mongodb');
-    ipcMain.removeAllListeners('add-to-mongodb-reply');
     ipcMain.on('add-to-mongodb', async (event, data) => { 
-      const newData=await registMongo(ol,wm,event,data);
+      const newData=await registMongo(ol,wm,event,data,boardWindow);
       const serializedData=JSON.parse(JSON.stringify(newData));
       event.reply('add-to-mongodb-reply', serializedData);});
   } else {
     ipcMain.on('add-to-mongodb', async (event, data) => { 
-      const newData = await registMongo(ol, wm, event, data);
+      const newData = await registMongo(ol,wm,event,data,boardWindow);
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('add-to-mongodb-reply', serializedData);});
   };
     
   if (ipcMain.eventNames().includes('get-Research') && ipcMain.listenerCount('get-Research') >= 1) {
     ipcMain.removeAllListeners('get-Research');
-    ipcMain.removeAllListeners('get-Research-reply');
     ipcMain.on('get-Research', async (event, ol, wm, keywords) => { 
-      const newData = await getResearchIPC(ol, wm, keywords); 
+      const newData = await getResearchIPC(ol, wm, keywords, boardWindow); 
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('get-Research-reply', serializedData);
     });
   } else {
     ipcMain.on('get-Research', async (event, ol, wm, keywords) => {
-      const newData = await getResearchIPC(ol, wm, keywords);
+      const newData = await getResearchIPC(ol, wm, keywords, boardWindow);
       const serializedData = JSON.parse(JSON.stringify(newData));
       event.reply('get-Research-reply', serializedData);});
   };   
   
   if (ipcMain.eventNames().includes('update-DBdata') && ipcMain.listenerCount('update-DBdata') >= 1) {
     ipcMain.removeAllListeners('update-DBdata');
-    ipcMain.removeAllListeners('update-DBdata-reply');
     ipcMain.on('update-DBdata', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
-      await updateDataIPC(renewData,ol,wm); 
-      const renewAllData = await getAllThreadsIPC(ol, wm);
+      await updateDataIPC(renewData,ol,wm,boardWindow); 
+      const renewAllData = await getAllThreadsIPC(ol, wm,boardWindow);
       if( typeof renewAllData !== JSON ) {const serializedData = JSON.parse(JSON.stringify(renewAllData));
         event.reply('update-DBdata-reply', serializedData);}
       else if (typeof renewAllData === JSON){ const serializedData = JSON.parse(renewAllData);
@@ -192,8 +174,8 @@ async function createBoard(ol,wm) {
   } else {
     ipcMain.on('update-DBdata', async (event, ...args) => {
       const renewData = args[0]; ol = args[1];wm= args[2];
-      await updateDataIPC(renewData,ol,wm);
-      const renewAllData = await getAllThreadsIPC(ol, wm);
+      await updateDataIPC(renewData,ol,wm,boardWindow);
+      const renewAllData = await getAllThreadsIPC(ol, wm,boardWindow);
       if( typeof renewAllData !== JSON ) {const serializedData = JSON.parse(JSON.stringify(renewAllData));
         event.reply('update-DBdata-reply', serializedData);}
       else if (typeof renewAllData === JSON){ const serializedData = JSON.parse(renewAllData);
@@ -202,34 +184,32 @@ async function createBoard(ol,wm) {
 
   if (ipcMain.eventNames().includes('delete-thread') && ipcMain.listenerCount('delete-thread') >= 1) {
     ipcMain.removeAllListeners('delete-thread');
-    ipcMain.removeAllListeners('delete-thread-reply');
     ipcMain.on('delete-thread', async (event, ...args) => {
-      const renewData = args[0]; ol = args[1];wm= args[2];
-      const renewAllData = await deleteDataIPC(renewData,ol,wm); 
+      const delData = args[0]; ol = args[1];wm= args[2];
+      const renewAllData = await deleteDataIPC(delData,ol,wm,boardWindow); 
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
       event.reply('delete-thread-reply', serializedData);
     });
   } else {
     ipcMain.on('delete-thread', async (event, ...args) => {
-      const renewData = args[0]; ol = args[1];wm= args[2];
-      const renewAllData = await deleteDataIPC(renewData,ol,wm);
+      const renewData = args[0]; ol = args[1];wm= args[2]; 
+      const renewAllData = await deleteDataIPC(renewData,ol,wm,boardWindow);
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
       event.reply('delete-thread-reply', serializedData);});
   };   
   
   if (ipcMain.eventNames().includes('thread-exchange') && ipcMain.listenerCount('thread-exchange') >= 1) {
     ipcMain.removeAllListeners('thread-exchange');
-    ipcMain.removeAllListeners('thread-exchange-reply');
     ipcMain.on('thread-exchange', async (event, ...args) => {
-      const renewData = args[0]; ol = args[1];wm= args[2];
-      const renewAllData = await exchangeDataIPC(renewData,ol,wm); 
+      const exchData = args[0]; ol = args[1];wm= args[2];
+      const renewAllData = await exchangeDataIPC(exchData,ol,wm,boardWindow); 
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
-      event.reply('thread-exchange-reply', serializedData);
+          event.reply('thread-exchange-reply', serializedData);
     });
   } else {
     ipcMain.on('thread-exchange', async (event, ...args) => {
-      const renewData = args[0]; ol = args[1];wm= args[2];
-      const renewAllData = await exchangeDataIPC(renewData,ol,wm);
+      const exchData = args[0]; ol = args[1];wm= args[2];
+      const renewAllData = await exchangeDataIPC(exchData,ol,wm,boardWindow);
       const serializedData = JSON.parse(JSON.stringify(renewAllData));
       event.reply('thread-exchange-reply', serializedData);});
   };   

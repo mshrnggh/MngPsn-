@@ -16,7 +16,7 @@ async function flipNotepad(event,submitterId,formSection) {
     const title=formData.get('inputTitle');const content=formData.get('inputContent');
     const note={title,content};formSection.classList.add('flip');
     await new Promise(resolve => setTimeout(resolve, 350));
-    await addToDB(note, submitterId, formSection, event);
+    await addToDB(note, submitterId,formSection);
     formSection.classList.remove('flip');
     await new Promise(resolve => setTimeout(resolve, 0));
     formSection.classList.remove('show');
@@ -29,19 +29,40 @@ async function flipNotepad(event,submitterId,formSection) {
     };
   //formSection.addEventListener('submit',flipNotepad);このコードがここに無くても、2行目のDomContentLoadedで再度イベントリスナーが登録される
 };
-async function addToDB(note, submitterId) {let newAllThre;
-  if (submitterId==='submitLocal') {newAllThre=await window.postAPI.addToLocalDB(note)
-  } else if (submitterId==='submitMongoDB') {
-    newAllThre = await window.postAPI.addToMongoDB(note);
-  }; await showReloadList(newAllThre);
+async function addToDB(note, submitterId,formSection) {
+  let newAllThre;let allData=[]; let newData=[];let maxkey=0;
+  if (submitterId==='submitLocal') {
+    await window.postAPI.removeChannel('post-lslStrg');
+    await window.postAPI.receive('post-lclStrg',async(event, ...args)=> {newData=args[0];});
+    newAllThre=await window.postAPI.addToLocalDB(note);
+   
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i); const value = localStorage.getItem(key);
+      maxkey = i; allData.push({ key, value });};
+
+    for (const data of allData) { const obj = JSON.parse(data.value);
+      if (obj.id===newData.id){window.alert('ERROR: id already exists in localStorage');return;
+      }else if(obj.title===newData.title){
+        await formSection.classList.remove('flip');
+        await formSection.classList.remove('show');
+        await new Promise(resolve => setTimeout(resolve, 0));
+        //flipアニメ効果を切ってから、window.alertしないと、alert中はずっとアニメ効果してしまう。
+        await window.alert('ERROR: The same title already exists in localStorage.');        
+    return;};};
+    maxkey = `key${maxkey+1}`; localStorage.setItem(maxkey,JSON.stringify(newData));
+     
+  }else if(submitterId==='submitMongoDB'){newAllThre=await window.postAPI.addToMongoDB(note);}; 
+  await showReloadList();
 };
-async function showReloadList(newAllThre) {
+
+async function showReloadList() {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata'); 
-  await window.postAPI.receive('get-DBdata',async(...args)=>{[data,ol,wm]=args; 
+  await window.postAPI.receive('get-DBdata',async(event, ...args)=>{[data,ol,wm]=args; 
+    console.log('data,ol,wm in showReloadList ', data,ol,wm);
     if (typeof data === "json") {data = JSON.parse(data);}
     else {data = JSON.parse(JSON.stringify(data));}
-    const allReloadThre = await createReloadList(newAllThre);
+    const allReloadThre = await createReloadList(data);
     const allReloadData = allReloadThre instanceof NodeList?allReloadThre:allReloadThre.querySelectorAll('.singleThread');
     await createReloadColumns(allReloadData);});
 };

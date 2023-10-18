@@ -1,9 +1,11 @@
-import { createBoardList, createBoardColumns } from './get.mjs';
+import { createBoardList, createBoardColumns, getLocalStorage  } from './get.mjs';
 let ol = false; let wm = false;let data = [];
 const searchButton = document.getElementById('search-button');
 searchButton.addEventListener('click', async (event)=>{
-  event.preventDefault(); await window.postAPI.send('get-DBdata');
-  await window.postAPI.receive('get-DBdata', async(...args)=>{[data,ol,wm]=args;
+  event.preventDefault(); await window.postAPI.removeChannel('get-DBdata'); 
+  await window.postAPI.send('get-DBdata');
+  await window.postAPI.receive('get-DBdata', async(event, ...args)=>{[data,ol,wm]=args;
+    console.log('data in search.mjs ',data);
     await showResearchedList(ol,wm)
 });});
   

@@ -30,7 +30,6 @@ window.addEventListener('DOMContentLoaded', () => {
 });
   
 window.startUpAPI.on('mongodb-uri-incorrect', async (event, message) => {
-  console.log('mongodb-uri-incorrect event received in mjs');
   const messageBoxOptions={message:'Your MongoDB Atlas URI is incorrect, please click the bellow [OK}-button to set it right first.'};
   const customAlert = document.getElementById('custom-alert');
   const alertMessage = document.getElementById('alert-message');
@@ -57,7 +56,6 @@ window.startUpAPI.on('mongodb-uri-empty', async (event, ...args) => {
 });});
 
 window.startUpAPI.on('nousemongodb', async (event, ...args) => {
-  console.log('nousemongodb event received in mjs');
   const messageBoxOptions={message:'MongoDB Atlas is not utilized this time. The bellow [OK]-button-click is to lead you ahead.'};
   const customAlert = document.getElementById('custom-alert');
   const alertMessage = document.getElementById('alert-message');
