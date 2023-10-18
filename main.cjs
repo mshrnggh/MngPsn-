@@ -1,19 +1,10 @@
 const { app, BrowserWindow, ipcMain } = require("electron");
-const path = require("path");
-const express = require('express');
-const appExpr = express();
-appExpr.use(express.json());
-appExpr.use(express.static('public'));
-appExpr.use(express.static('public/style'));
-appExpr.use(express.static('public/render'));
-appExpr.use(express.static('public/mainProcess'));
-appExpr.use(express.static('public/preload'));
-app.setPath("userData", path.join(__dirname, "data"));
+const path = require("path");const express = require('express');
+const appExpr = express();appExpr.use(express.json());
+appExpr.use(express.static('public'));appExpr.use(express.static('public/style'));
+appExpr.use(express.static('public/render'));appExpr.use(express.static('public/mainProcess'));
+appExpr.use(express.static('public/preload'));app.setPath("userData", path.join(__dirname, "data"));
 const {startUp, subConfig} = require(path.join(__dirname, './public/mainProcess/startup.cjs'));
-const {fork} = require('child_process');
-const startupProcess = fork(path.join(__dirname, './public/mainProcess/startup.cjs'));
-const serverProcess = fork(path.join(__dirname, './public/mainProcess/server.cjs'));
-const postIPCProcess = fork(path.join(__dirname, './public/mainProcess/postIPC.cjs'));
 app.disableHardwareAcceleration(); //hardware acceleration無効化before app is ready or app.whenReady()
 app.whenReady().then(() => {startUp();});
 ipcMain.removeAllListeners('startup-config-data');
