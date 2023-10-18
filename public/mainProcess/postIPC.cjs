@@ -13,7 +13,7 @@ async function registLocal(ol, wm, event, addData, bW) {
       await event.reply('post-lclStrg', addData); //ここは、bW.webContens.sendではない方が良いらしい。
       const newAllThre = await postReloadIPC(ol, wm, event, bW);
       resolve (newAllThre);   
-  });});};
+  });}).catch()};
 async function registMongo(ol, wm, event, data, bW) {
   const existingData = await Thread.find({ title: data.title });
   if(existingData.length>0){console.log('Data already exists in MongoDB');return;};

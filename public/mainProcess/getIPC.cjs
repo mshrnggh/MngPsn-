@@ -33,7 +33,7 @@ async function getAllThreadsIPC(ol, wm, bW) { let allThreads = []; let data=[];
            const content = thread.content || thread['content:']; 
            const straged = thread.straged || thread['straged:'];
            return {id,title,content,straged};
-         }); resolve (allThreads);
+         }); resolve (allThreads); 
        }); 
-      }});};
+     }}).catch();};
 module.exports = { getAllThreadsIPC }

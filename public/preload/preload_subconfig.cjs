@@ -4,7 +4,10 @@ contextBridge.exposeInMainWorld('subConfigAPI', {
     return new Promise((resolve, reject) => {
       ipcRenderer.removeAllListeners('sub-config-data');
       ipcRenderer.send('sub-config-data', configData)
-     });//ipcrendere.sendは、Promiseオブジェクトを返さないので、.then.catchできないので注意。
+     });
+     //ipcrendere.sendは、Promiseオブジェクトを返さないので、.then.catchできないので、
+     //resolve, rejectを使う場合に、別の方法が要るが、今回送信の失敗はなさそうなので
+     //resolve, rejectは使わない。
   },
   send: async (channel, ...args) => {
     await ipcRenderer.removeAllListeners(channel);

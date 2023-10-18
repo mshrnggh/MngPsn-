@@ -30,6 +30,9 @@ async function deleteStrg() {
           const value = localStorage.getItem(key); localStorage.setItem(newKey, value);
           localStorage.removeItem(key);}
 });resolve();});};
+//上のコードでは、エラーが発生したときにPromiseが拒否され、rejectが呼び出される場所が無いので、rejectが必要ない。
+//ただしresolve()は必要で、resolveが無いとexchStrg()関数がPromiseを解決終了しなく、その結果呼び出し元がブロックされます。
+
 
 async function exchStrg () {
   return new Promise(async(resolve,reject)=>{    
