@@ -1,4 +1,4 @@
-import { createBoardList, createBoardColumns, getLocalStorage } from "./get.mjs";
+import { createBoardList, createBoardColumns, getLocalStorage, alignLocalStorage} from "./get.mjs";
 document.addEventListener('DOMContentLoaded', ()=>{
   const deleteSection = document.querySelector('.delete-section');
   const strageExchange = document.querySelector('.strage-exchange');
@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', ()=>{
 });//document.addEventListener('DOMContentLoaded', は非同期ではない。DOM読込完了を待つ
 //一方でwindow.addEventListener('DOMContentloaded', は非同期でり、DOM読込完了を待たない
   
-async function deleteStrg() {
+async function deleteStrg() { await alignLocalStorage();
   return new Promise(async(resolve,reject)=>{
       const lclStrg = await getLocalStorage();
       await window.postAPI.removeChannel('delete-lclStrg');
@@ -19,11 +19,11 @@ async function deleteStrg() {
       await window.postAPI.receive('delete-lclStrg',async(event, ...args)=>{
         const trgtKy = args[0]; const targetKey = `key${trgtKy}`;        
         await localStorage.removeItem(targetKey);
-        
-        const targetKeys = Object.keys(localStorage).filter(key => {
-          const num = parseInt(key.replace('key', ''));
-          return !isNaN(num) && num > trgtKy;
-        }); 
+        const targetKeys = Object.keys(localStorage).filter(key => key.startsWith('key'))
+        .sort((a, b)=>{ const numA = parseInt(a.replace('key', ''));
+          const numB = parseInt(b.replace('key', '')); return numA - numB;
+        }).filter(key =>{const num=parseInt(key.replace('key', ''));
+          return !isNaN(num) && num > trgtKy;}); 
 
         for (const key of targetKeys) {
           const num = parseInt(key.replace('key', '')); const newKey = `key${num - 1}`;
@@ -33,8 +33,7 @@ async function deleteStrg() {
 //上のコードでは、エラーが発生したときにPromiseが拒否され、rejectが呼び出される場所が無いので、rejectが必要ない。
 //ただしresolve()は必要で、resolveが無いとexchStrg()関数がPromiseを解決終了しなく、その結果呼び出し元がブロックされます。
 
-
-async function exchStrg () {
+async function exchStrg () { await alignLocalStorage();
   return new Promise(async(resolve,reject)=>{    
     const lclStrg = await getLocalStorage();
     await window.postAPI.removeChannel('exch-lclStrg');
@@ -43,6 +42,7 @@ async function exchStrg () {
       //preload fileのreceiveに注意事項あり。
       if (args.length > 0) { const trgtKy = args[0]; const targetKey = `key${trgtKy}`;
         const allKeys = await Object.keys(localStorage); // localStorageに格納されているすべてのキーを取得する
+                
         let max = await allKeys.reduce((max, key) => { 
           const num = parseInt(key.replace('key', ''), 10); //キーから数値を取得する。10は10進法を意味する。
           return num > max ? num : max;}, 0);  // 最大値を更新する// 
@@ -51,13 +51,16 @@ async function exchStrg () {
           if(selectedData) { const parsedData = JSON.parse(selectedData);
             await localStorage.setItem(maxKey,JSON.stringify(parsedData));
             await localStorage.removeItem(targetKey);
-            const targetKeys = Object.keys(localStorage).filter(key => {
-              const num=parseInt(key.replace('key','')); return !isNaN(num) && num > trgtKy;
+            const targetKeys = Object.keys(localStorage).filter(key => key.startsWith('key'))
+            .sort((a, b)=>{ const numA = parseInt(a.replace('key', ''));
+              const numB = parseInt(b.replace('key', '')); return numA - numB;
+            }).filter(key =>{const num=parseInt(key.replace('key', ''));
+            return !isNaN(num) && num > trgtKy;
             }); 
-            for (const key of targetKeys) {
+            for (let i = 0; i < targetKeys.length; i++) { const key = targetKeys[i];
               const num = parseInt(key.replace('key','')); const newKey = `key${num - 1}`;
-              const value = localStorage.getItem(key); localStorage.setItem(newKey, value);
-            localStorage.removeItem(key);}
+              const value = localStorage.getItem(key); 
+              localStorage.setItem(newKey, value); localStorage.removeItem(key);}
           };  
       };});resolve();});};
 

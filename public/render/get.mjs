@@ -12,11 +12,30 @@ document.addEventListener('DOMContentLoaded', async () => {
 });
 
 export async function getLocalStorage(){
+  await alignLocalStorage();
   const count = await localStorage.length; const allStorage = [];
   for (let i = 0; i < count; i++) {
     const key = `key${i}`; const item = localStorage.getItem(key);
      if (item !== null) { allStorage.push(JSON.parse(item)); }; 
 }; return allStorage;};
+
+export async function alignLocalStorage() {
+  const count = await localStorage.length;
+  const originalKey = [];
+  const originalValue = [];
+  for (let i = 0; i < count; i++) {
+    const key = `key${i}`;
+    const item = localStorage.getItem(key);
+    if (item !== null) {
+      originalKey.push(key);
+      originalValue.push(item);
+    }
+  }
+  localStorage.clear();
+  for (let i = 0; i < originalKey.length; i++) {
+    localStorage.setItem(originalKey[i], originalValue[i]);
+  }
+}
 
 export async function showBoardList() {
   await window.postAPI.removeChannel('get-DBdata');

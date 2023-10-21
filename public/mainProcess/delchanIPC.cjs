@@ -15,7 +15,7 @@ async function deleteDataIPC(delData, ol, wm, bW) {
         //thread引数は、data変数の中の複数のobjectを巡回監視するので、thread.idで表現する
         //一方比較対象のdelData配列には1つのobjectしか存在しないが、配列である為delData[0].idで表現する
         if(delTrgtIndx!==-1){await event.sender.send('delete-lclStrg',delTrgtIndx);};};   
-        //12行目noipcMain.on('get-lslStrg-reply'のチャンネルとは異なるところに返信するので、event.replyでは、
+        //12行目ipcMain.on('get-lslStrg-reply'のチャンネルとは異なるところに返信するので、event.replyでは、
         //channelが同一になると判断されてしまい、25行目のresolve(getAllThreadsIPC());が実行されるまで、
         //rendering file側のipcRenderer.onに相当する部分が受信が一瞬遅れてしまうだけで、argsが取得できない問題が
         //rendering側で発生してしまう。　その為、event.sender.send, window.webContents.sendを使用する。 

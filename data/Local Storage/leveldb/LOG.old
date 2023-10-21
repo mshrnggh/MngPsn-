@@ -1,3 +1,6 @@
-2023/10/18-21:52:29.338 2cb8 Reusing MANIFEST F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/MANIFEST-000001
-2023/10/18-21:52:29.339 2cb8 Recovering log #17
-2023/10/18-21:52:29.340 2cb8 Reusing old log F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/000017.log 
+2023/10/21-23:08:06.429 4df8 Reusing MANIFEST F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/MANIFEST-000001
+2023/10/21-23:08:06.429 4df8 Recovering log #19
+2023/10/21-23:08:06.430 4df8 Reusing old log F:\UDPRGSTDY\MngDB-Pstmn-Prac\MngPsnm\data\Local Storage\leveldb/000019.log 
+2023/10/21-23:09:13.470 40c0 Level-0 table #24: started
+2023/10/21-23:09:13.480 40c0 Level-0 table #24: 19683 bytes OK
+2023/10/21-23:09:13.484 40c0 Delete type=0 #19

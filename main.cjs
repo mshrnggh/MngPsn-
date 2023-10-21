@@ -44,7 +44,7 @@ ipcMain.on('sub-config-data', async (event, data) => {
   //上は、if(startupWindow)分岐だけでは、undefined以外であっては、nullでもtrueを返すことに注意。
     
   // subConfigWindowが定義されるまで待つ
-  await new Promise((resolve) => {
+  new Promise((resolve) => {
     if (subConfigWindow) {resolve();} else {
       app.on('browser-window-created', (event, window) => {
         if (window === subConfigWindow) {resolve();}

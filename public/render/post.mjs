@@ -59,7 +59,6 @@ async function showReloadList() {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata'); 
   await window.postAPI.receive('get-DBdata',async(event, ...args)=>{[data,ol,wm]=args; 
-    console.log('data,ol,wm in showReloadList ', data,ol,wm);
     if (typeof data === "json") {data = JSON.parse(data);}
     else {data = JSON.parse(JSON.stringify(data));}
     const allReloadThre = await createReloadList(data);
