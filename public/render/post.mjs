@@ -1,4 +1,5 @@
 window.flipNotepad = flipNotepad;
+import { v4 as uuidv4 } from "../../node_modules/uuid/dist/esm-browser/index.js"
 let ol = false; let wm = false; let data = []; 
 import { dragStart, dragEnd} from "./delchang.mjs";
 document.addEventListener('DOMContentLoaded', () => {
@@ -16,7 +17,7 @@ async function flipNotepad(event,submitterId,formSection) {
     const title=formData.get('inputTitle');const content=formData.get('inputContent');
     const note={title,content};formSection.classList.add('flip');
     await new Promise(resolve => setTimeout(resolve, 350));
-    await addToDB(note, submitterId,formSection);
+    await addToDB(note, submitterId, formSection);
     formSection.classList.remove('flip');
     await new Promise(resolve => setTimeout(resolve, 0));
     formSection.classList.remove('show');
@@ -29,32 +30,37 @@ async function flipNotepad(event,submitterId,formSection) {
     };
   //formSection.addEventListener('submit',flipNotepad);このコードがここに無くても、2行目のDomContentLoadedで再度イベントリスナーが登録される
 };
-async function addToDB(note, submitterId,formSection) {
-  let newAllThre;let allData=[]; let newData=[];let maxkey=0;
+async function addToDB(note, submitterId, formSection) {
+  let newAllThre;let allStrg=[]; let maxKey=0;
   if (submitterId==='submitLocal') {
-    await window.postAPI.removeChannel('post-lslStrg');
-    await window.postAPI.receive('post-lclStrg',async(event, ...args)=> {newData=args[0];});
-    newAllThre=await window.postAPI.addToLocalDB(note);
-   
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i); const value = localStorage.getItem(key);
-      maxkey = i; allData.push({ key, value });};
-
-    for (const data of allData) { const obj = JSON.parse(data.value);
-      if (obj.id===newData.id){window.alert('ERROR: id already exists in localStorage');return;
-      }else if(obj.title===newData.title){
+      maxKey = i; allStrg.push({ key, value });
+    }; 
+    const newData={id:await uuidv4(),title:note.title,content:note.content,straged:'at Local DB',createdAt:await new Date(),};  
+    
+    for (const data of allStrg) { const obj = JSON.parse(data.value);
+      if (note.title===obj.title){
+        window.alert('ERROR: The same title already exist in local storage');return;
+      } else {  
         await formSection.classList.remove('flip');
         await formSection.classList.remove('show');
         await new Promise(resolve => setTimeout(resolve, 0));
-        //flipアニメ効果を切ってから、window.alertしないと、alert中はずっとアニメ効果してしまう。
-        await window.alert('ERROR: The same title already exists in localStorage.');        
-    return;};};
-    maxkey = `key${maxkey+1}`; localStorage.setItem(maxkey,JSON.stringify(newData));
-     
+    //flipアニメ効果を切ってから、window.alertしないと、alert中はずっとアニメ効果してしまう。
+        maxKey = `key${maxKey+1}`; localStorage.setItem(maxKey,JSON.stringify(newData));  
+    };};
+  
+    if(allStrg.length===0){ localStorage.setItem('key0',JSON.stringify(newData));};
+    
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i); const value = localStorage.getItem(key);
+      const allNewStorage = []; allNewStorage.push({ key, value });
+    };
+           
   }else if(submitterId==='submitMongoDB'){newAllThre=await window.postAPI.addToMongoDB(note);}; 
   await showReloadList();
 };
-
+    
 async function showReloadList() {
   await window.postAPI.removeChannel('get-DBdata');
   await window.postAPI.send('get-DBdata'); 

@@ -18,11 +18,11 @@ document.addEventListener('DOMContentLoaded', () => {
   };});}});
   const formSection = document.querySelector('.form-section');
   const modifyButton = document.querySelector('#modify');
-  modifyButton.addEventListener('click', (event) => {
-   handleClick(event, formSection);});
+  modifyButton.addEventListener('click', (event) => {  
+    handleClick(event, formSection);});
 });            
-async function handleClick(event,formSection) { event.preventDefault(); 
-  let renewData, data, ol, wm;  
+async function handleClick(event, formSection) { event.preventDefault(); 
+  let renewData, data, ol, wm, allThreads;  
   const inputTitle = document.querySelector('#inputTitle');
   const inputContent = document.querySelector('#inputContent');
   let lockedThread;
@@ -34,7 +34,7 @@ async function handleClick(event,formSection) { event.preventDefault();
   const straged = lockedThread.dataset.straged;
   const newTitle = inputTitle.value.trim();
   const newContent = inputContent.value.trim();
-  renewData = { title:newTitle, content:newContent, straged, id }; 
+  renewData = { title:newTitle, content:newContent, straged, id, createdAt: await new Date() }; 
   for (let i = 0; i < localStorage.length; i++) {
     const key = localStorage.key(i); const value = localStorage.getItem(key);
     if(renewData.id===JSON.parse(value).id){localStorage.setItem(key, JSON.stringify(renewData));
@@ -48,14 +48,14 @@ async function handleClick(event,formSection) { event.preventDefault();
       await window.postAPI.send('update-DBdata',renewData,ol,wm);
       await window.postAPI.removeChannel('update-DBdata-reply');
       await window.postAPI.receive('update-DBdata-reply', async (event, ...args) => {
-        const newAllData=args[0];
+        const newAllData=args[0]; 
         if (typeof newAllData === "json") {data = JSON.parse(newAllData);}
         else {data = JSON.parse(JSON.stringify(newAllData));}
         const allThreList = await createBoardList(data);
-        const allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
-        await flipModify(event,formSection); await createBoardColumns(allThreads);      
-  });});};
-};
+        allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
+      });});
+      await flipModify(event,formSection); await createBoardColumns(allThreads);      
+};};
 async function flipModify(event, formSection) {
   if(!event||event.target.nodeName!=='BUTTON') {return;}
   if(!formSection){console.error('formSection not found');return;};
