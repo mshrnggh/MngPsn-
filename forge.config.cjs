@@ -16,8 +16,6 @@ module.exports = {
         to: "node_modules/uuid/dist/esm-browser"}
     ]
   },
-
-
   makers: [   
      {
       name: "@electron-forge/maker-zip",
