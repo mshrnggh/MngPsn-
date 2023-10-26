@@ -1,0 +1,10 @@
+{
+  "build": {
+    "extraResources": [
+      {
+        "from": "node_modules/uuid/dist/esm-browser",
+        "to": "node_modules/uuid/dist/esm-browser"
+      }
+    ]
+  }
+}
