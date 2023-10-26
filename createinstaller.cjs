@@ -36,7 +36,7 @@ const options = {
     "electron-winstaller": "^5.1.0"
   },
   volta: {
-    node: "18.15.0"
+    "node": "18.15.0"
   }
 }
 

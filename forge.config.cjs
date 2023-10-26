@@ -1,15 +1,14 @@
 module.exports = {
   packagerConfig: {
-    name: "my_application",
-    executableName: "my_application",
-    icon: "path/to/icon.ico",
+    name: "my_bulletine_board",
+    executableName: "my_bulletine_board",
     appBundleId: "com.example.my_application",
     win32metadata: {
       CompanyName: "",
-      Auther: "Masahiro Noguchi",
+      Author: "Masahiro Noguchi",
       ProductName: "My bulletine board Application",
       FileDescription: "My Application Description",
-      OriginalFilename: "my_application.exe",
+      OriginalFilename: "Bulletine-board.exe",
       InternalName: "my_application"
     }
   },
