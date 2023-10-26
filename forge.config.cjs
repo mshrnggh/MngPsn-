@@ -9,9 +9,15 @@ module.exports = {
       ProductName: "My bulletine board Application",
       FileDescription: "My Application Description",
       OriginalFilename: "Bulletine-board.exe",
-      InternalName: "my_application"
-    }
+      InternalName: "my_application" 
+    },
+    extraResource: [
+      { from: "node_modules/uuid/dist/esm-browser",
+        to: "node_modules/uuid/dist/esm-browser"}
+    ]
   },
+
+
   makers: [   
      {
       name: "@electron-forge/maker-zip",
