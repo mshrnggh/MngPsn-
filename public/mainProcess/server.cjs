@@ -100,7 +100,7 @@ async function createBoard(ol,wm) {
       preload: path.join(__dirname, '../preload/preload_board.cjs'),    
       webSecurity: true, allowRunningInsecureContent: false, 
       contentSecurityPolicy: "default-src 'self'; script-src 'self' 'unsafe-inline' file:; style-src 'self' 'unsafe-inline';",
-      chromeWebviewVersion: '93.0.4577.63'
+      chromeWebviewVersion: '118.0.5993.32'
   
     },});
   boardWindow.loadURL(url.format({pathname: path.join(__dirname, '../render/index.html'),

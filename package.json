@@ -9,26 +9,26 @@
     },
     "main": "main.cjs",
     "license": "MIT",
+    "build": {
+        "asar": true 
+    },  
     "scripts": {
         "dev": "electron .",
-        "server": "node --experimental-modules server.cjs",
         "start": "electron-forge start",
         "package": "electron-forge package",
-        "make": "electron-forge make",
-        "publish": "electron-forge publish"
+        "make": "electron-forge make"
     },
     "dependencies": {
         "dotenv": "^10.0.0",
         "express": "^4.18.2",
         "mongodb": "^4.17.0",
-        "mongoose": "^7.3.2",
-        "nodemon": "^3.0.1"
+        "mongoose": "^7.3.2"
     },
     "devDependencies": {
-        "@electron-forge/cli": "^6.2.1",
+        "@electron-forge/cli": "^6.4.2",
         "@electron-forge/maker-zip": "^6.4.2",
-        "@electron-forge/publisher-github": "^6.4.2",
-        "electron": "^25.8.4",
+        "electron": "^27.0.2",
+        "electron-builder": "^24.6.4",
         "uuid": "^9.0.1"
     }
 }

@@ -11,10 +11,7 @@ module.exports = {
       OriginalFilename: "Bulletine-board.exe",
       InternalName: "my_application" 
     },
-    extraResource: [
-      { from: "node_modules/uuid/dist/esm-browser",
-        to: "node_modules/uuid/dist/esm-browser"}
-    ]
+    extraResource: ["node_modules/uuid/dist"]
   },
   makers: [   
      {
