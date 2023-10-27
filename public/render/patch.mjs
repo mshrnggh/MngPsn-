@@ -26,10 +26,8 @@ async function handleClick(event, formSection) { event.preventDefault();
   const inputTitle = document.querySelector('#inputTitle');
   const inputContent = document.querySelector('#inputContent');
   let lockedThread;
-  while (!lockedThread) {
-    lockedThread = document.querySelector('.singleThread.locked');
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }; 
+  while (!lockedThread) {lockedThread = document.querySelector('.singleThread.locked');
+    await new Promise(resolve => setTimeout(resolve, 100));}; 
   const id = lockedThread.dataset.id;
   const straged = lockedThread.dataset.straged;
   const newTitle = inputTitle.value.trim();
@@ -43,20 +41,21 @@ async function handleClick(event, formSection) { event.preventDefault();
   if (lockedThread) {
     await window.postAPI.removeChannel('get-DBdata');
     await window.postAPI.send('get-DBdata');
-    window.postAPI.receive('get-DBdata',async(event, ...args)=> { [data,ol,wm]=args;
+    await window.postAPI.receive('get-DBdata',async(event, ...args)=> { [data,ol,wm]=args;
       await window.postAPI.removeChannel('update-DBdata');
       await window.postAPI.send('update-DBdata',renewData,ol,wm);
       await window.postAPI.removeChannel('update-DBdata-reply');
       await window.postAPI.receive('update-DBdata-reply', async (event, ...args) => {
-        const newAllData=args[0]; 
+        const newAllData=args[0];
         if (typeof newAllData === "json") {data = JSON.parse(newAllData);}
-        else {data = JSON.parse(JSON.stringify(newAllData));}
+        else {data = JSON.parse(JSON.stringify(newAllData));}; 
         const allThreList = await createBoardList(data);
         allThreads = allThreList instanceof NodeList?allThreList:allThreList.querySelectorAll('.singleThread');
-      });});
-      await flipModify(event,formSection); await createBoardColumns(allThreads);      
+        await createBoardColumns(allThreads);
+      });}); 
+      await flipModify(event,formSection);     
 };};
-async function flipModify(event, formSection) {
+async function flipModify(event, formSection) { 
   if(!event||event.target.nodeName!=='BUTTON') {return;}
   if(!formSection){console.error('formSection not found');return;};
   await flipAnination(event,formSection);

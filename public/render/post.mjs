@@ -1,6 +1,6 @@
 window.flipNotepad = flipNotepad;
-import { v4 as uuidv4 } from "../../node_modules/uuid/dist/esm-browser/index.js";
-// import { v4 as uuidv4 } from "../../node_modules/@smithy/middleware-retry/node_modules/uuid/dist/esm-browser/index.js";
+//import { v4 as uuidv4 } from "../../node_modules/uuid/dist/esm-browser/index.js";
+import { v4 as uuidv4 } from "../../node_modules/@smithy/middleware-retry/node_modules/uuid/dist/esm-browser/index.js";
 let ol = false; let wm = false; let data = []; 
 import { dragStart, dragEnd} from "./delchang.mjs";
 document.addEventListener('DOMContentLoaded', () => {

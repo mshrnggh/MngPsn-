@@ -32,9 +32,7 @@ export async function alignLocalStorage() {
     }
   }
   localStorage.clear();
-  for (let i = 0; i < originalKey.length; i++) {
-    localStorage.setItem(originalKey[i], originalValue[i]);
-  }
+  for (let i = 0; i < originalKey.length; i++) {localStorage.setItem(originalKey[i], originalValue[i]);}
 }
 
 export async function showBoardList() {
@@ -48,7 +46,7 @@ export async function showBoardList() {
   await createBoardColumns(allThreads);});
 };
 
-export function createBoardList(data) {
+export function createBoardList(data) { 
   const allThreadsarr=Array.isArray(data) && Array.isArray(data[0])?data.flat():Array.isArray(data)?data:[data];
   const boardList = document.querySelectorAll('.board-list');
   boardList.forEach((boardList)=>{boardList.innerHTML='';});
